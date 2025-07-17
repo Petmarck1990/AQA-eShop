@@ -1,0 +1,5 @@
+{
+  "linkToRegisterPage": "https://automaticityacademy.ngrok.app/register",
+  "linkToForgotPassword": "https://automaticityacademy.ngrok.app/forgot-password",
+  "emptyString": ""
+}
