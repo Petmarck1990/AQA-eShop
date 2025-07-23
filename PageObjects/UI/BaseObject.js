@@ -3,9 +3,6 @@ import { LoginPage } from "./LoginPage.js";
 import { RegisterPage } from "./RegisterPage.js";
 import { DashboardPage } from "./DashboardPage.js";
 import { GeneralMethods } from "../../Fixtures/generalMethods.js";
-// import { GeneralMethods } from "../../Fixtures/generalMethods.js";
-// import credentials from "../../Fixtures/credentials.json";
-// import generalData from "../../Fixtures/generalData.json";
 import dotenv from "dotenv";
 import path from "path";
 
