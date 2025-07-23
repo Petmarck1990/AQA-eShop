@@ -1,4 +1,8 @@
+import { expect } from "@playwright/test";
 import generalData from "../../Fixtures/generalData.json";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 export class LoginPage {
   constructor(page) {
     this.page = page;
@@ -35,9 +39,36 @@ export class LoginPage {
     await this.logButton.click();
   }
 
-  async login(email, password) {
+  async login({ email = process.env.EMAIL, password = process.env.PASSWORD }) {
     await this.email.fill(email);
+    await expect(this.email).toHaveValue(email);
     await this.password.fill(password);
+    await expect(this.password).toHaveValue(password);
     await this.signinButton.click();
+  }
+
+  async checkPageElemets({
+    welcomeMessage = this.welcomeMessage,
+    wavingHand = this.wavingHand,
+    email = this.email,
+    password = this.password,
+    signinButton = this.signinButton,
+    questionForAcc = this.questionForAcc,
+    linkForCreate = this.linkForCreate,
+    likForForgotPassword = this.likForForgotPassword,
+  }) {
+    await expect(welcomeMessage).toBeVisible();
+    await expect(wavingHand).toBeVisible();
+    await expect(email).toBeVisible();
+    await expect(email).toHaveAttribute("placeholder", "Email address");
+    await expect(password).toBeVisible();
+    await expect(password).toHaveAttribute("placeholder", "Password");
+    await expect(signinButton).toBeVisible();
+    await expect(questionForAcc).toBeVisible();
+    await expect(linkForCreate).toHaveAttribute("href", this.linkToPage);
+    await expect(likForForgotPassword).toHaveAttribute(
+      "href",
+      this.linkToForgotPassword
+    );
   }
 }
