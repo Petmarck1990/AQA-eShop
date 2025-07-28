@@ -1,63 +1,123 @@
-import { test, expect } from "../PageObjects/UI/BaseObject.js";
-import generalData from "../Fixtures/generalData.json";
+import { test, expect } from "../PageObjects/BaseObject.js";
 import credentials from "../Fixtures/credentials.json";
+import endpoints from "../Fixtures/endpoints.json";
 import { LoginPage } from "../PageObjects/UI/LoginPage.js";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
 let page;
+
 test.describe("Positive tests for Login page", () => {
-  test.beforeEach(async ({ loginPage }) => {
-    await loginPage.goTo();
+  test.beforeEach(async ({ generalMethods, wpage }) => {
+    page = wpage;
+    await generalMethods.goToPage({ url: endpoints.loginEndpoint });
   });
 
   test("Checkout Login page elements", async ({ loginPage }) => {
     await loginPage.checkPageElemets({});
   });
 
-  test("Login with valid credentials", async ({ loginPage, wpage }) => {
+  test("Login with valid credentials", async ({
+    loginPage,
+    dashboardPage,
+    generalMethods,
+  }) => {
     await loginPage.login({});
-    const response = await wpage.waitForResponse(
-      (response) =>
-        response.url().includes("/dashboard") && response.status() === 200
-    );
+    const response = await generalMethods.getResponse({
+      endpoint: endpoints.dashboardEndpoint,
+    });
     await expect(response.status()).toBe(200);
-    await expect(wpage).toHaveURL(generalData.linkToDashboard);
-    const token = await wpage.evaluate(() => localStorage.getItem("token"));
-    expect(token).toBeTruthy();
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    await expect(dashboardPage.productsContainer).toBeVisible();
+    await expect(generalMethods.tokenValidation()).toBeTruthy();
+    expect(await generalMethods.getValueFromLocalStorage("userId")).toEqual(
+      await generalMethods.getValueFromLocalStorage("cartId")
+    );
   });
 
   test("Login from 'Dashboard' link on Register page (handling popup)", async ({
-    wpage,
     loginPage,
+    generalMethods,
   }) => {
-    await wpage.goto("/");
+    await page.goto("/");
     const [newPage] = await Promise.all([
-      wpage.waitForEvent("popup"),
+      page.waitForEvent("popup"),
       loginPage.dashboardButton.click(),
     ]);
-    const loginPage2 = new LoginPage(newPage);
-    await loginPage2.login({});
+    const loginPageNewTab = new LoginPage(newPage);
+    await loginPageNewTab.login({});
     const response = await newPage.waitForResponse(
       (response) =>
-        response.url().includes("/dashboard") && response.status() === 200
+        response.url().includes(endpoints.dashboardEndpoint) &&
+        response.status() === 200
     );
     await expect(response.status()).toBe(200);
-    await expect(newPage).toHaveURL(generalData.linkToDashboard);
+    await expect(newPage).toHaveURL(endpoints.dashboardEndpoint);
     const token = await newPage.evaluate(() => localStorage.getItem("token"));
-    expect(token).toBeTruthy();
+    await expect(generalMethods.tokenValidation(token)).toBeTruthy();
+  });
+
+  test("Login with umlauts", async ({
+    loginPage,
+    generalMethods,
+    dashboardPage,
+  }) => {
+    await loginPage.login({
+      email: process.env.UMLAUTSMAIL,
+      password: process.env.UMLAUTSPASSWORD,
+    });
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    await expect(generalMethods.tokenValidation()).toBeTruthy();
+    await expect(dashboardPage.productsContainer).toBeVisible();
+  });
+
+  test("Login from 'Log in now' link on Register page (Register button)", async ({
+    registerPage,
+    loginPage,
+    generalMethods,
+    dashboardPage,
+  }) => {
+    await generalMethods.goToPage({ url: endpoints.registerEndpoint });
+    await registerPage.loginNowRedirectButton.click();
+    await expect(page).toHaveURL(endpoints.loginEndpoint);
+    await loginPage.login({});
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.loginEndpoint)
+    ).toBe(200);
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    await expect(generalMethods.tokenValidation()).toBeTruthy();
+    await expect(dashboardPage.productsContainer).toBeVisible();
+  });
+
+  test("Login with chinese letters", async ({
+    loginPage,
+    generalMethods,
+    dashboardPage,
+  }) => {
+    await loginPage.login({
+      email: process.env.CHINESELETTERMAIL,
+      password: process.env.CHINESELETTERPASSWORD,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.loginEndpoint)
+    ).toBe(200);
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    await expect(generalMethods.tokenValidation()).toBeTruthy();
+    await expect(dashboardPage.productsContainer).toBeVisible();
   });
 });
 
 test.describe("Negative test cases for Login page", async () => {
-  test.beforeEach(async ({ loginPage }) => {
-    await loginPage.goTo("");
+  test.beforeEach(async ({ generalMethods, wpage }) => {
+    page = wpage;
+    await generalMethods.goToPage({ url: endpoints.loginEndpoint });
   });
 
   test("Login with empty fields", async ({ loginPage }) => {
     await loginPage.login({
-      email: generalData.emptyString,
-      password: generalData.emptyString,
+      email: "",
+      password: "",
     });
     await expect(loginPage.email).toBeEmpty();
     await expect(loginPage.password).toBeEmpty();
@@ -72,6 +132,9 @@ test.describe("Negative test cases for Login page", async () => {
     await loginPage.login({ email: credentials.invalidEmail });
     expect(await generalMethods.checkResponseStatus("/login")).toBe(422);
     await expect(loginPage.invalidMailFormatMessage).toBeVisible();
+    await expect(await generalMethods.getValueFromLocalStorage("token")).toBe(
+      null
+    );
   });
 
   test("Login with invalid password", async ({ loginPage, generalMethods }) => {
@@ -79,25 +142,30 @@ test.describe("Negative test cases for Login page", async () => {
     await expect(loginPage.invalidCredentialsMessage).toBeVisible();
   });
 
-  test("Login from 'Log in now' link on Register page (Register button)", async ({
-    registerPage,
-    loginPage,
-  }) => {
-    await registerPage.goTo();
-    await registerPage.linkForLogin.click();
+  test("Use page after deleting token", async ({ loginPage }) => {
     await loginPage.login({});
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    const token = await page.evaluate(() => localStorage.getItem("token"));
+    expect(token).toBeTruthy();
+    await page.evaluate(() => localStorage.removeItem("token"));
+    await page.context().clearCookies();
+    const noToken = await page.evaluate(() => localStorage.getItem("token"));
+    expect(noToken).toBeFalsy();
+    await page.reload();
+    await expect(page).toHaveURL("");
   });
 
-  test("Use page after deleting token", async ({ wpage, loginPage }) => {
-    await loginPage.login({});
-    await expect(wpage).toHaveURL(generalData.linkToDashboard);
-    const token = await wpage.evaluate(() => localStorage.getItem("token"));
-    expect(token).toBeTruthy();
-    await wpage.evaluate(() => localStorage.removeItem("token"));
-    await wpage.context().clearCookies();
-    const noToken = await wpage.evaluate(() => localStorage.getItem("token"));
-    expect(noToken).toBeFalsy();
-    await wpage.reload();
-    await expect(wpage).toHaveURL("");
+  test("Login with special characters", async ({
+    loginPage,
+    generalMethods,
+  }) => {
+    loginPage.login({
+      email: credentials.emailWithSymbol,
+      password: credentials.passwordWithSymbol,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.loginEndpoint)
+    ).toBe(422);
+    await expect(loginPage.invalidMailFormatMessage).toBeVisible();
   });
 });

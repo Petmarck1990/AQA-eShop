@@ -1,5 +1,9 @@
 import { GeneralMethods } from "../../Fixtures/generalMethods";
 import { expect } from "@playwright/test";
+import endpoints from "../../Fixtures/endpoints.json";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(__dirname, "../.emv") });
 let generalMethods = new GeneralMethods();
 export class RegisterPage {
   constructor(page) {
@@ -9,31 +13,28 @@ export class RegisterPage {
     this.password = page.locator("#password");
     this.registerButton = page.locator("[aria-label='Register']");
     this.regPage = page.locator("[href*='register']");
-    this.invalidMailMessage = page.locator(
-      "p:has-text('The email field format is invalid.')"
+    this.invalidMailMessage = page.getByText(
+      "The email field format is invalid."
     );
-    this.invalidPasswordMessage = page.locator(
-      "p:has-text('The password field must be at least 6 characters.')"
+    this.tooShortPasswordMessage = page.getByText(
+      "The password field must be at least 6 characters."
     );
-    this.emptyUsernameMessage = page.locator(
-      "p:has-text('The username field is required.')"
+    this.emptyUsernameMessage = page.getByText(
+      "The username field is required."
     );
-    this.registerHeadingText = page.locator("text='Register!'");
-    this.questionForAcc = page.locator("text='Already have an account?'");
-    this.instagramLink = "https://www.instagram.com/automaticity.qa/";
+    this.registerHeadingText = page.getByText("Register!");
+    this.questionForAcc = page.getByText("Already have an account?");
     this.instagramIcon = page.locator("a[href*='instagram']");
-    this.successRegisterMessage = page.locator(
-      "text='Successfully registered!'"
+    this.successRegisterMessage = page.getByText("Successfully registered!");
+    this.loginNowRedirectButton = page.locator("a:has-text('Log in now!')");
+    this.linkToLoginPage = process.env.BASEURL + endpoints.loginEndpoint;
+    this.tooLongUsernameMessage = page.getByText(
+      "The username field must not be greater than 255 characters."
     );
-    this.linkForLogin = page.locator("a:has-text('Log in now!')");
-    this.linkToLoginPage = "https://automaticityacademy.ngrok.app/login";
-    this.placeholderAtribute = page.locator();
-  }
-
-  async goTo() {
-    await this.page.goto("/");
-    await this.page.waitForLoadState("networkidle");
-    await this.regPage.click();
+    this.userExistMessage = page.getByText(
+      "The username has already been taken."
+    );
+    this.mailExistMessage = page.getByText("The email has already been taken.");
   }
 
   async registerNewUser({
@@ -57,7 +58,7 @@ export class RegisterPage {
     email = this.email,
     password = this.password,
     registerButton = this.registerButton,
-    linkForLogin = this.linkForLogin,
+    loginNowRedirectButton = this.loginNowRedirectButton,
     linkToLoginPage = this.linkToLoginPage,
   }) {
     await expect(registerHeadingText).toBeVisible();
@@ -70,6 +71,9 @@ export class RegisterPage {
     await expect(password).toHaveAttribute("placeholder", "Password");
     await expect(registerButton).toBeVisible();
     await expect(registerButton).toBeInViewport();
-    await expect(linkForLogin).toHaveAttribute("href", linkToLoginPage);
+    await expect(loginNowRedirectButton).toHaveAttribute(
+      "href",
+      linkToLoginPage
+    );
   }
 }

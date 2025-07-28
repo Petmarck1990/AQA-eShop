@@ -1,8 +1,8 @@
 import { test as base, chromium } from "@playwright/test";
-import { LoginPage } from "./LoginPage.js";
-import { RegisterPage } from "./RegisterPage.js";
-import { DashboardPage } from "./DashboardPage.js";
-import { GeneralMethods } from "../../Fixtures/generalMethods.js";
+import { LoginPage } from "./UI/LoginPage.js";
+import { RegisterPage } from "./UI/RegisterPage.js";
+import { DashboardPage } from "./UI/DashboardPage.js";
+import { GeneralMethods } from "../Fixtures/generalMethods.js";
 import dotenv from "dotenv";
 import path from "path";
 
@@ -14,7 +14,7 @@ const testPages = base.extend({
       const browser = await chromium.launch();
       const context = await browser.newContext();
       const page = await context.newPage();
-      await use(page, context);
+      await use(page);
       await page.close();
       await context.close();
       await browser.close();

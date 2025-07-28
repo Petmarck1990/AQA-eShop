@@ -1,0 +1,6 @@
+{
+  "loginEndpoint": "/login",
+  "registerEndpoint": "/register",
+  "dashboardEndpoint": "/dashboard",
+  "forgotPasswordEndpoint": "/forgot-password"
+}

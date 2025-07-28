@@ -1,7 +1,0 @@
-{
-  "linkToRegisterPage": "https://automaticityacademy.ngrok.app/register",
-  "linkToLoginPage": "https://automaticityacademy.ngrok.app/login",
-  "linkToForgotPassword": "https://automaticityacademy.ngrok.app/forgot-password",
-  "linkToDashboard": "https://automaticityacademy.ngrok.app/dashboard",
-  "emptyString": ""
-}

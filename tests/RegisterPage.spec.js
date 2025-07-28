@@ -1,11 +1,19 @@
-import { test, expect } from "../PageObjects/UI/BaseObject";
+import { test, expect } from "../PageObjects/BaseObject";
 import credentials from "../Fixtures/credentials.json";
-import generalData from "../Fixtures/generalData.json";
+import endpoints from "../Fixtures/endpoints.json";
+import dotenv from "dotenv";
+import path from "path";
+import { url } from "inspector";
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
+let page;
 
 test.describe("Positive test cases for register page", () => {
-  test.beforeEach(async ({ registerPage }) => {
-    await registerPage.goTo();
+  test.beforeEach(async ({ generalMethods, wpage }) => {
+    page = wpage;
+    await generalMethods.goToPage({ url: endpoints.registerEndpoint });
   });
+
   test("Checkout Register page elements", async ({ registerPage }) => {
     await registerPage.checkPageElements({});
   });
@@ -13,50 +21,96 @@ test.describe("Positive test cases for register page", () => {
   test("Valid registration", async ({
     registerPage,
     dashboardPage,
-    wpage,
     generalMethods,
   }) => {
     await registerPage.registerNewUser({});
     await expect(registerPage.successRegisterMessage).toBeVisible();
-    expect(await generalMethods.checkResponseStatus("/dashboard")).toBe(200);
-    await expect(wpage).toHaveURL(generalData.linkToDashboard);
-    const token = await wpage.evaluate(() => localStorage.getItem("token"));
+    expect(
+      await generalMethods.checkResponseStatus(endpoints.dashboardEndpoint)
+    ).toBe(200);
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    const token = await page.evaluate(() => localStorage.getItem("token"));
     expect(token).toBeTruthy();
     await expect(dashboardPage.searchField).toBeVisible();
   });
   test("Register user from 'Create today!' link on Login page", async ({
     registerPage,
     loginPage,
-    wpage,
     dashboardPage,
     generalMethods,
   }) => {
     await loginPage.logButton.click();
     await loginPage.linkForCreate.click();
     await registerPage.registerNewUser({});
-    expect(await generalMethods.checkResponseStatus("/dashboard")).toBe(200);
-    await expect(wpage).toHaveURL(generalData.linkToDashboard);
-    await wpage.waitForLoadState("networkidle");
-    const token = await wpage.evaluate(() => localStorage.getItem("token"));
+    expect(
+      await generalMethods.checkResponseStatus(endpoints.dashboardEndpoint)
+    ).toBe(200);
+    await expect(page).toHaveURL(endpoints.dashboardEndpoint);
+    await page.waitForLoadState("networkidle");
+    const token = await page.evaluate(() => localStorage.getItem("token"));
     expect(token).toBeTruthy();
     await expect(dashboardPage.productsContainer).toBeVisible();
   });
-});
-test.describe("Negative test cases for Register page", async () => {
-  test.beforeEach(async ({ registerPage }) => {
-    await registerPage.goTo();
+
+  test("Try to register with umlauts", async ({
+    registerPage,
+    generalMethods,
+    dashboardPage,
+  }) => {
+    await registerPage.registerNewUser({
+      username: generalMethods.randomUsername,
+      email: `ä${generalMethods.randomEmail}`,
+      password: `ä${generalMethods.randomPassword}`,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(200);
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.dashboardEndpoint)
+    ).toBe(200);
+    await expect(dashboardPage.productsContainer).toBeVisible();
   });
+});
+
+test.describe("Negative test cases for Register page", async () => {
+  test.beforeEach(async ({ generalMethods, wpage }) => {
+    page = wpage;
+    await generalMethods.goToPage({ url: endpoints.registerEndpoint });
+  });
+
+  test("Try to register with existing username", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({ username: process.env.USERNAME });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.userExistMessage).toBeVisible();
+  });
+
+  test("Try to register with existing mail adress", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({ email: process.env.EMAIL });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.mailExistMessage).toBeVisible();
+  });
+
   test("Try to register without credentials", async ({
     registerPage,
     generalMethods,
   }) => {
     await registerPage.registerNewUser({
-      username: generalData.emptyString,
-      email: generalData.emptyString,
-      password: generalData.emptyString,
+      username: "",
+      email: "",
+      password: "",
     });
     expect(
-      await generalMethods.checkResponseStatus("/api/v1/auth/register")
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
     ).toBe(422);
     await expect(registerPage.username).toBeEmpty();
     await expect(registerPage.email).toBeEmpty();
@@ -71,9 +125,7 @@ test.describe("Negative test cases for Register page", async () => {
     await registerPage.registerNewUser({
       email: credentials.invalidEmail,
     });
-    expect(
-      await generalMethods.checkResponseStatus("/api/v1/auth/register")
-    ).toBe(422);
+    expect(await generalMethods.checkResponseStatus("/register")).toBe(422);
     await expect(registerPage.invalidMailMessage).toBeVisible();
   });
 
@@ -81,10 +133,71 @@ test.describe("Negative test cases for Register page", async () => {
     registerPage,
     generalMethods,
   }) => {
-    await registerPage.registerNewUser({ username: generalData.emptyString });
-    expect(
-      await generalMethods.checkResponseStatus("/api/v1/auth/register")
+    await registerPage.registerNewUser({ username: "" });
+    await expect(
+      generalMethods.checkResponseStatus(endpoints.registerEndpoint)
     ).not.toBe(200);
     await expect(registerPage.emptyUsernameMessage).toBeVisible();
+  });
+
+  test("Try to register with username with more than 255 characters", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({
+      username: generalMethods.randomUsername.repeat(35),
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.tooLongUsernameMessage).toBeVisible();
+  });
+  test("Try to register with email with more than 255 characters", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({
+      email: `${generalMethods.randomUsername.repeat(35)}@gmail.com`,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.tooLongUsernameMessage).toBeVisible();
+  });
+
+  test("Try to register with special characters", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({
+      username: generalMethods.randomUsername,
+      email: `★${generalMethods.randomEmail}`,
+      password: `★${generalMethods.randomPassword}`,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.invalidMailMessage).toBeVisible();
+  });
+
+  test("Try to register with white spaces in credentials", async ({
+    registerPage,
+    generalMethods,
+  }) => {
+    await registerPage.registerNewUser({
+      username: `${generalMethods.randomUsername} space`,
+      email: `P ${generalMethods.randomEmail}`,
+      password: `123 ${generalMethods.randomPassword}`,
+    });
+    await expect(
+      await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
+    ).toBe(422);
+    await expect(registerPage.invalidMailMessage).toBeVisible();
+  });
+  test("Try to register a user with one-character password", async ({
+    registerPage,
+  }) => {
+    await registerPage.registerNewUser({ password: "1" });
+    await expect(registerPage.tooShortPasswordMessage).toBeVisible();
   });
 });
