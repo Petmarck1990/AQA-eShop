@@ -125,6 +125,15 @@ test.describe("Negative test cases for Login page", async () => {
     await expect(loginPage.emptyPasswordMessage).toBeVisible();
   });
 
+  test("Login with wrong password", async ({ loginPage, generalMethods }) => {
+    await loginPage.login({ password: generalMethods.randomPassword });
+    expect(await generalMethods.checkResponseStatus("/login")).toBe(401);
+    await expect(loginPage.invalidCredentialsMessage).toBeVisible();
+    await expect(await generalMethods.getValueFromLocalStorage("token")).toBe(
+      null
+    );
+  });
+
   test("Login with invalid email format", async ({
     loginPage,
     generalMethods,

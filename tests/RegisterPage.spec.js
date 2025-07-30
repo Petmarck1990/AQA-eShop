@@ -3,7 +3,6 @@ import credentials from "../Fixtures/credentials.json";
 import endpoints from "../Fixtures/endpoints.json";
 import dotenv from "dotenv";
 import path from "path";
-import { url } from "inspector";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let page;
@@ -52,7 +51,7 @@ test.describe("Positive test cases for register page", () => {
     await expect(dashboardPage.productsContainer).toBeVisible();
   });
 
-  test("Try to register with umlauts", async ({
+  test("Register a user with umlauts", async ({
     registerPage,
     generalMethods,
     dashboardPage,

@@ -3,8 +3,11 @@ import { LoginPage } from "./UI/LoginPage.js";
 import { RegisterPage } from "./UI/RegisterPage.js";
 import { DashboardPage } from "./UI/DashboardPage.js";
 import { GeneralMethods } from "../Fixtures/generalMethods.js";
+import { LoginAPI } from "./APII/LoginAPI.js";
 import dotenv from "dotenv";
 import path from "path";
+import { request } from "http";
+import { RegisterAPI } from "./APII/RegisterAPI.js";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -33,6 +36,13 @@ const testPages = base.extend({
   generalMethods: async ({ wpage }, use) => {
     await use(new GeneralMethods(wpage));
   },
+  loginAPI: async ({ request }, use) => {
+    await use(new LoginAPI(request));
+  },
+  registerAPI: async ({ request }, use) => {
+    await use(new RegisterAPI(request));
+  },
 });
 export const test = testPages;
 export const expect = testPages.expect;
+// export const request = request;
