@@ -1,4 +1,5 @@
 import { test, expect, request } from "../PageObjects/BaseObject.js";
+import responseMessages from "../Fixtures/responseMessages.json";
 import credentials from "../Fixtures/credentials.json";
 import dotenv from "dotenv";
 import path, { resolve } from "path";
@@ -7,166 +8,124 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 let baseUrl;
 
 test.describe("Positive test cases for Register API", async () => {
-  test.beforeEach(async ({}) => {
-    baseUrl = process.env.BASEURLAPI;
+  test("Register a user with valid credentials", async ({ authAPI }) => {
+    await authAPI.register({});
   });
 
-  test("Register a user with valid credentials", async ({
-    registerAPI,
-    loginAPI,
-  }) => {
-    let response = await registerAPI.registerUser({});
-    expect(response.ok()).toBeTruthy();
-    expect(response.status()).toBe(200);
-    let body = await response.json();
-    expect(body.status).toBe("Success");
-    expect(body.message).toBe("User created successfully");
-    let token = await body.auth;
-    expect(loginAPI.tokenValidation(token)).toBeTruthy();
-  });
-
-  test("Register a user with umlauts", async ({
-    registerAPI,
-    generalMethods,
-    loginAPI,
-  }) => {
-    let response = await registerAPI.registerUser({
+  test("Register a user with umlauts", async ({ authAPI, generalMethods }) => {
+    await authAPI.register({
       usrename: `ä${generalMethods.randomUsername}`,
       email: `ä${generalMethods.randomEmail}`,
       password: `ä${generalMethods.randomPassword}`,
     });
-    expect(response.ok()).toBeTruthy();
-    expect(response.status()).toBe(200);
-    let body = await response.json();
-    expect(body.status).toBe("Success");
-    expect(body.message).toBe("User created successfully");
-    let token = await body.auth;
-    expect(loginAPI.tokenValidation(token)).toBeTruthy();
   });
 });
 
 test.describe("Negative test cases for Register API", async () => {
-  test.beforeEach(async () => {
-    baseUrl = process.env.BASEURLAPI;
-  });
-
-  test("Try to register with existing username adress", async ({
-    registerAPI,
-  }) => {
-    let response = await registerAPI.registerUser({
-      username: process.env.USERNAME,
+  test("Try to register with existing username adress", async ({ authAPI }) => {
+    let body = await authAPI.register({
+      username: process.env.USER_NAME,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.usernameExist);
-    expect(body.errors.username[0]).toBe(registerAPI.usernameExist);
+    expect(body.message).toBe(responseMessages.usernameExist);
+    expect(body.errors.username[0]).toBe(responseMessages.usernameExist);
   });
 
-  test("Try to register with existing mail adress", async ({ registerAPI }) => {
-    let response = await registerAPI.registerUser({
+  test("Try to register with existing mail adress", async ({ authAPI }) => {
+    let body = await authAPI.register({
       email: process.env.EMAIL,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.emailExist);
-    expect(body.errors.email[0]).toBe(registerAPI.emailExist);
+    expect(body.message).toBe(responseMessages.emailExist);
+    expect(body.errors.email[0]).toBe(responseMessages.emailExist);
   });
 
-  test("Test register API with different method", async ({ registerAPI }) => {
-    let response = await registerAPI.registerUser({ method: "patch" });
-    expect(response.status()).toBe(405);
-    let body = await response.json();
-    expect(body.error).toBe(registerAPI.methodNotAllowedMessage);
+  test("Test register API with different method", async ({ authAPI }) => {
+    let body = await authAPI.register({ method: "patch", statusCode: 405 });
+    expect(body.error).toBe(responseMessages.methodNotAllowed);
   });
 
-  test("Try to register without credentials", async ({ registerAPI }) => {
-    let response = await registerAPI.registerUser({
+  test("Try to register without credentials", async ({ authAPI }) => {
+    let body = await authAPI.register({
       username: "",
       email: "",
       password: "",
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.errors.username[0]).toBe(registerAPI.usernameRequired);
-    expect(body.errors.email[0]).toBe(registerAPI.emailRequired);
-    expect(body.errors.password[0]).toBe(registerAPI.passwordRequired);
+    expect(body.errors.username[0]).toBe(responseMessages.usernameRequired);
+    expect(body.errors.email[0]).toBe(responseMessages.emailRequired);
+    expect(body.errors.password[0]).toBe(responseMessages.passwordRequired);
   });
 
-  test("Try to register with invalid type of mail", async ({ registerAPI }) => {
-    let response = await registerAPI.registerUser({
+  test("Try to register with invalid type of mail", async ({ authAPI }) => {
+    let body = await authAPI.register({
       email: credentials.invalidEmail,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.invalidEmailFormat);
-    expect(body.errors.email[0]).toBe(registerAPI.invalidEmailFormat);
+    expect(body.message).toBe(responseMessages.invalidEmailFormat);
+    expect(body.errors.email[0]).toBe(responseMessages.invalidEmailFormat);
   });
 
-  test("Try to register without username", async ({ registerAPI }) => {
-    let response = await registerAPI.registerUser({
+  test("Try to register without username", async ({ authAPI }) => {
+    let body = await authAPI.register({
       username: "",
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.usernameRequired);
+    expect(body.message).toBe(responseMessages.usernameRequired);
   });
 
   test("Try to register with username longer than 255 characters", async ({
-    registerAPI,
+    authAPI,
     generalMethods,
   }) => {
-    let response = await registerAPI.registerUser({
+    let body = await authAPI.register({
       username: generalMethods.randomUsername.repeat(35),
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.usernameLimitMessage);
+    expect(body.message).toBe(responseMessages.usernameLimit);
   });
 
   test("try to register a new user with an email longer than 255 characters", async ({
-    registerAPI,
+    authAPI,
     generalMethods,
   }) => {
-    let response = await registerAPI.registerUser({
+    await authAPI.register({
       email: `${generalMethods.randomUsername.repeat(35)}@gmail.com`,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
   });
 
   test("Try to register with special characters", async ({
-    registerAPI,
+    authAPI,
     generalMethods,
   }) => {
-    let response = await registerAPI.registerUser({
+    await authAPI.register({
       username: `${generalMethods.randomUsername}★`,
       email: `★${generalMethods.randomEmail}`,
       password: `★${generalMethods.randomPassword}`,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
   });
 
   test("Try to register a new user with short password (3 characters)", async ({
-    registerAPI,
+    authAPI,
   }) => {
-    let response = await registerAPI.registerUser({
+    let body = await authAPI.register({
       password: credentials.shortPassword,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    expect(body.message).toBe(registerAPI.shortPasswordMessage);
+    expect(body.message).toBe(responseMessages.shortPassword);
   });
 
   test("Try to register with white spaces in credentials", async ({
-    registerAPI,
+    authAPI,
     generalMethods,
   }) => {
-    let response = await registerAPI.registerUser({
+    await authAPI.register({
       username: `${generalMethods.randomUsername} space`,
       email: `P ${generalMethods.randomEmail}`,
       password: `123 ${generalMethods.randomPassword}`,
+      statusCode: 422,
     });
-    expect(response.status()).toBe(422);
-    let body = await response.json();
-    console.log(body);
   });
 });

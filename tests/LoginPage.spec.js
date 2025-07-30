@@ -64,8 +64,8 @@ test.describe("Positive tests for Login page", () => {
     dashboardPage,
   }) => {
     await loginPage.login({
-      email: process.env.UMLAUTSMAIL,
-      password: process.env.UMLAUTSPASSWORD,
+      email: process.env.UMLAUTS_MAIL,
+      password: process.env.UMLAUTS_PASSWORD,
     });
     await expect(page).toHaveURL(endpoints.dashboardEndpoint);
     await expect(generalMethods.tokenValidation()).toBeTruthy();
@@ -96,8 +96,8 @@ test.describe("Positive tests for Login page", () => {
     dashboardPage,
   }) => {
     await loginPage.login({
-      email: process.env.CHINESELETTERMAIL,
-      password: process.env.CHINESELETTERPASSWORD,
+      email: process.env.CHINESE_LETTER_MAIL,
+      password: process.env.CHINESE_LETTER_PASSWORD,
     });
     await expect(
       await generalMethods.checkResponseStatus(endpoints.loginEndpoint)

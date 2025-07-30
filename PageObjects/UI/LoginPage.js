@@ -15,10 +15,10 @@ export class LoginPage {
     this.wavingHand = page.locator(".animate-waving-hand");
     this.questionForAcc = page.getByText("Don't have an account?");
     this.linkForCreate = page.getByText("Create today!");
-    this.linkToPage = process.env.BASEURL + endpoints.registerEndpoint;
+    this.linkToPage = process.env.BASE_URL + endpoints.registerEndpoint;
     this.likForForgotPassword = page.getByText("Forgot your password?");
     this.linkToForgotPassword =
-      process.env.BASEURL + endpoints.forgotPasswordEndpoint;
+      process.env.BASE_URL + endpoints.forgotPasswordEndpoint;
     this.emptyEmailMessage = page.getByText("The email field is required.");
     this.emptyPasswordMessage = page.getByText(
       "The password field is required."

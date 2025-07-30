@@ -23,7 +23,7 @@ export class GeneralMethods {
     return `12345678${this.randomNumber}`;
   }
 
-  async getResponse({ endpoint = process.env.BASEURL, statusCode = 200 }) {
+  async getResponse({ endpoint = process.env.BASE_URL, statusCode = 200 }) {
     const response = await this.page.waitForResponse(
       (response) =>
         response.url().includes(endpoint) && response.status() === statusCode

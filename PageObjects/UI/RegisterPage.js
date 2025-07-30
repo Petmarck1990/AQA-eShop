@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.emv") });
 let generalMethods = new GeneralMethods();
+
 export class RegisterPage {
   constructor(page) {
     this.page = page;
@@ -27,7 +28,7 @@ export class RegisterPage {
     this.instagramIcon = page.locator("a[href*='instagram']");
     this.successRegisterMessage = page.getByText("Successfully registered!");
     this.loginNowRedirectButton = page.locator("a:has-text('Log in now!')");
-    this.linkToLoginPage = process.env.BASEURL + endpoints.loginEndpoint;
+    this.linkToLoginPage = process.env.BASE_URL + endpoints.loginEndpoint;
     this.tooLongUsernameMessage = page.getByText(
       "The username field must not be greater than 255 characters."
     );

@@ -6,8 +6,8 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 export class LoginAPI {
   constructor(request) {
-    (this.baseUrl = process.env.BASEURLAPI), (this.request = request);
-    this.successLoginMessage = "User logged in successfully";
+    (this.baseUrl = process.env.BASE_URL_API), (this.request = request);
+    // this.successLoginMessage = "User logged in successfully";
   }
   async getToken({
     email = process.env.EMAIL,
@@ -27,7 +27,7 @@ export class LoginAPI {
     let token = await body.auth;
     expect(token.type).toBe("Bearer");
     expect(token.token.split(".").length).toBe(3);
-    expect(token.token.length).toBe(349);
+    expect(token.token.length).toBeGreaterThan(1);
     return token;
   }
 

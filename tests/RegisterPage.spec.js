@@ -81,7 +81,7 @@ test.describe("Negative test cases for Register page", async () => {
     registerPage,
     generalMethods,
   }) => {
-    await registerPage.registerNewUser({ username: process.env.USERNAME });
+    await registerPage.registerNewUser({ username: process.env.USER_NAME });
     await expect(
       await generalMethods.checkResponseStatus(endpoints.registerEndpoint)
     ).toBe(422);

@@ -8,7 +8,7 @@ let generalMethods = new GeneralMethods();
 
 export class RegisterAPI {
   constructor(request) {
-    this.baseUrl = process.env.BASEURLAPI;
+    this.baseUrl = process.env.BASE_URL_API;
     this.request = request;
     this.usernameExist = "The username has already been taken.";
     this.emailExist = "The email has already been taken.";
@@ -73,5 +73,6 @@ export class RegisterAPI {
     expect(body.auth.token).toBeTruthy();
     expect(body.auth.type).toBe("Bearer");
     console.log(body);
+    return body;
   }
 }

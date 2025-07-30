@@ -1,0 +1,14 @@
+{
+  "usernameExist": "The username has already been taken.",
+  "emailExist": "The email has already been taken.",
+  "usernameRequired": "The username field is required.",
+  "emailRequired": "The email field is required.",
+  "passwordRequired": "The password field is required.",
+  "invalidEmailFormat": "The email field format is invalid.",
+  "usernameLimit": "The username field must not be greater than 255 characters.",
+  "shortPassword": "The password field must be at least 6 characters.",
+  "methodNotAllowed": "Method Not Allowed",
+  "loginSuccessfully": "User logged in successfully",
+  "validMailRequired": "The email field must be a valid email address.",
+  "registerSuccessfully": "User created successfully"
+}
