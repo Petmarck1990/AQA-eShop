@@ -5,11 +5,17 @@ import dotenv from "dotenv";
 import path, { resolve } from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-let baseUrl;
-
 test.describe("Positive test cases for Register API", async () => {
   test("Register a user with valid credentials", async ({ authAPI }) => {
     await authAPI.register({});
+  });
+
+  test("Validate register response schema", async ({
+    authAPI,
+    schemaValidation,
+  }) => {
+    let body = await authAPI.register({ returnBodyOnly: true });
+    await expect(schemaValidation.bodySchemaValidation(body)).toBeTruthy();
   });
 
   test("Register a user with umlauts", async ({ authAPI, generalMethods }) => {
