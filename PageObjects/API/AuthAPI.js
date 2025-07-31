@@ -80,6 +80,7 @@ export class AuthAPI {
     password = generalMethods.randomPassword,
     method = "post",
     statusCode = 200,
+    returnBodyOnly = false,
   }) {
     try {
       let response = await this.request[method](
@@ -114,7 +115,11 @@ export class AuthAPI {
           );
           expect(token.split(".").length).toBe(3);
           expect(token.length).toBeGreaterThan(1);
-          return token;
+          if (returnBodyOnly) {
+            return body200;
+          } else {
+            return token;
+          }
         case 422:
           expect(response.status()).toBe(422);
           expect(response.ok()).toBeFalsy();

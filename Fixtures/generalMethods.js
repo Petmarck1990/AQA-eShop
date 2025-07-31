@@ -1,7 +1,9 @@
-import { expect } from "../PageObjects/BaseObject.js";
+import { expect, test } from "../PageObjects/BaseObject.js";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+import { request } from "http";
+import fs from "fs";
 
 export class GeneralMethods {
   constructor(page) {
@@ -61,5 +63,25 @@ export class GeneralMethods {
 
   async getValueFromLocalStorage(value) {
     return await this.page.evaluate((key) => localStorage.getItem(key), value);
+  }
+
+  async insertTokenInLocalStorage(token) {
+    this.page.addInitScript((value) => {
+      window.localStorage.setItem("token", value);
+    }, token);
+  }
+
+  async writeTokenInEnvFile({ token = token, userToken = "TOKEN" }) {
+    const envFilePath = path.resolve(__dirname, "../.env");
+    let envContent = "";
+    envContent = fs.readFileSync(envFilePath, "utf8");
+    const tokenRegex = /^(TOKEN)=.*/m;
+    const tokenExists = tokenRegex.test(envContent);
+    if (tokenExists) {
+      envContent = envContent.replace(tokenRegex, `TOKEN=${token}`);
+    } else {
+      envContent += `TOKEN=${token}`;
+    }
+    fs.writeFileSync(envFilePath, envContent, "utf8");
   }
 }

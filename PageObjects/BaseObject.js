@@ -3,6 +3,7 @@ import { LoginPage } from "./UI/LoginPage.js";
 import { RegisterPage } from "./UI/RegisterPage.js";
 import { DashboardPage } from "./UI/DashboardPage.js";
 import { GeneralMethods } from "../Fixtures/generalMethods.js";
+import { SchemaValidation } from "../Fixtures/schemaValidation.js";
 import dotenv from "dotenv";
 import path from "path";
 import { request } from "http";
@@ -37,6 +38,9 @@ const testPages = base.extend({
   },
   authAPI: async ({ request }, use) => {
     await use(new AuthAPI(request));
+  },
+  schemaValidation: async ({ request }, use) => {
+    await use(new SchemaValidation(request));
   },
 });
 export const test = testPages;
