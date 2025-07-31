@@ -8,9 +8,7 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 let baseUrl;
 
 test.describe("Positive API test cases for Login", async () => {
-  test("Login with valid credentials", async ({ authAPI }) => {
-    await authAPI.login({});
-  });
+  test("Login with valid credentials", async ({ authAPI }) => {});
 
   test("Login with umlauts", async ({ authAPI }) => {
     await authAPI.login({

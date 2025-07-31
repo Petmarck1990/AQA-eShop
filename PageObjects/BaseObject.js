@@ -6,7 +6,7 @@ import { GeneralMethods } from "../Fixtures/generalMethods.js";
 import dotenv from "dotenv";
 import path from "path";
 import { request } from "http";
-import { AuthAPI } from "../PageObjects/APII/AuthAPI.js";
+import { AuthAPI } from "./API/AuthAPI.js";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
