@@ -3,16 +3,16 @@ import endpoints from "../Fixtures/endpoints.json";
 import dotenv from "dotenv";
 import path, { resolve } from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
-let page;
 
-test.describe("Test to login without credentials", async () => {
-  test.beforeEach(async ({ generalMethods, wpage }) => {
-    page = wpage;
+test.describe("Login with token", async () => {
+  test.beforeEach(async ({ generalMethods, authAPI }) => {
+    let token = await authAPI.login({});
+    await generalMethods.writeTokenInEnvFile({ token: token });
     await generalMethods.insertTokenInLocalStorage(process.env.TOKEN);
-    await generalMethods.goToPage({ url: endpoints.dashboardEndpoint });
   });
 
-  test("test", async ({ dashboardPage }) => {
+  test("Login with token", async ({ dashboardPage, generalMethods }) => {
+    await generalMethods.goToPage({ url: endpoints.dashboardEndpoint });
     await expect(dashboardPage.productsContainer).toBeVisible();
   });
 });
