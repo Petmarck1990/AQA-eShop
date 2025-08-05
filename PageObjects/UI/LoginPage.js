@@ -1,13 +1,14 @@
 import { expect } from "@playwright/test";
 import endpoints from "../../Fixtures/endpoints.json";
+import fs from "fs";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+
 export class LoginPage {
   constructor(page) {
     this.page = page;
     this.logButton = page.locator("text='Log in'");
-    // this.email = page.locator("#email");
     this.email = page.locator("#email");
     this.password = page.locator("#password");
     this.signinButton = page.locator("[aria-label='Sign in']");
@@ -63,5 +64,27 @@ export class LoginPage {
       "href",
       this.linkToForgotPassword
     );
+  }
+
+  async getUserSession() {
+    await this.page.goto(process.env.BASE_URL + endpoints.loginEndpoint);
+    await this.login({});
+    await this.page.waitForLoadState("networkidle");
+    const authFile = path.join(__dirname, "../../.auth/user.json");
+    const localStorage = await this.page.evaluate(() =>
+      JSON.stringify(localStorage)
+    );
+    fs.writeFileSync(authFile, localStorage, "utf-8");
+    return localStorage;
+  }
+
+  async loginWithSession(page) {
+    let context = await page.context();
+    const localStorage = await fs.readFileSync(".auth/user.json");
+    await context.addInitScript((storage) => {
+      for (const [key, value] of Object.entries(storage)) {
+        window.localStorage.setItem(key, value);
+      }
+    }, JSON.parse(localStorage));
   }
 }

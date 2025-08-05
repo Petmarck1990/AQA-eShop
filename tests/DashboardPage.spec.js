@@ -4,15 +4,17 @@ import dotenv from "dotenv";
 import path, { resolve } from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
-test.describe("Login with token", async () => {
-  test.beforeEach(async ({ generalMethods, authAPI }) => {
-    let token = await authAPI.login({});
-    await generalMethods.writeTokenInEnvFile({ token: token });
-    await generalMethods.insertTokenInLocalStorage(process.env.TOKEN);
+let page;
+test.describe("Login with token", () => {
+  test.beforeEach(async ({ loginPage, wpage, generalMethods }) => {
+    page = wpage;
+    await loginPage.loginWithSession(page);
+    await generalMethods.goToPage({
+      url: endpoints.dashboardEndpoint,
+    });
   });
 
-  test("Login with token", async ({ dashboardPage, generalMethods }) => {
-    await generalMethods.goToPage({ url: endpoints.dashboardEndpoint });
+  test("Go to the Dashboard page", async ({ dashboardPage }) => {
     await expect(dashboardPage.productsContainer).toBeVisible();
   });
 });

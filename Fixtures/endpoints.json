@@ -5,5 +5,7 @@
   "forgotPasswordEndpoint": "/forgot-password",
   "loginApiEndoint": "/auth/login",
   "registerApiEndpoint": "/auth/register",
-  "logoutApiEndpoint": "/auth/logout"
+  "logoutApiEndpoint": "/auth/logout",
+  "profileEndpoint": "/profile",
+  "checkoutEndpoint": "/checkout"
 }

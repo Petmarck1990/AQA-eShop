@@ -1,9 +1,11 @@
 import { expect, test } from "../PageObjects/BaseObject.js";
+import { page } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 import { request } from "http";
 import fs from "fs";
+import endpoint from "../Fixtures/endpoints.json";
 
 export class GeneralMethods {
   constructor(page) {
