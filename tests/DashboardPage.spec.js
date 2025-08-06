@@ -8,7 +8,7 @@ let page;
 test.describe("Login with token", () => {
   test.beforeEach(async ({ loginPage, wpage, generalMethods }) => {
     page = wpage;
-    await loginPage.loginWithSession(page);
+    await loginPage.loginWithToken({ page });
     await generalMethods.goToPage({
       url: endpoints.dashboardEndpoint,
     });

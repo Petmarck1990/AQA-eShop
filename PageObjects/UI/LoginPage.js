@@ -66,25 +66,10 @@ export class LoginPage {
     );
   }
 
-  async getUserSession() {
-    await this.page.goto(process.env.BASE_URL + endpoints.loginEndpoint);
-    await this.login({});
-    await this.page.waitForLoadState("networkidle");
-    const authFile = path.join(__dirname, "../../.auth/user.json");
-    const localStorage = await this.page.evaluate(() =>
-      JSON.stringify(localStorage)
-    );
-    fs.writeFileSync(authFile, localStorage, "utf-8");
-    return localStorage;
-  }
-
-  async loginWithSession(page) {
+  async loginWithToken({ page, token = process.env.TOKEN }) {
     let context = await page.context();
-    const localStorage = await fs.readFileSync(".auth/user.json");
-    await context.addInitScript((storage) => {
-      for (const [key, value] of Object.entries(storage)) {
-        window.localStorage.setItem(key, value);
-      }
-    }, JSON.parse(localStorage));
+    await context.addInitScript((token) => {
+      window.localStorage.setItem("token", token);
+    }, token);
   }
 }

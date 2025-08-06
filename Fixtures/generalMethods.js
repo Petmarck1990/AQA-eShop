@@ -73,7 +73,7 @@ export class GeneralMethods {
     }, token);
   }
 
-  async writeTokenInEnvFile({ token = token, userToken = "TOKEN" }) {
+  async writeTokenInEnvFile(token) {
     const envFilePath = path.resolve(__dirname, "../.env");
     let envContent = "";
     envContent = fs.readFileSync(envFilePath, "utf8");
