@@ -15,6 +15,58 @@ export class GeneralMethods {
     return Math.round(Math.random() * 100000);
   }
 
+  get randomCardNumber() {
+    let result = "";
+    for (let i = 0; i < 16; i++) {
+      const digit =
+        i === 0
+          ? Math.floor(Math.random() * 9) + 1
+          : Math.floor(Math.random() * 10);
+      result += digit;
+    }
+    return result;
+  }
+
+  async randomFirstName() {
+    const names = [
+      "Ana",
+      "Marko",
+      "Luka",
+      "Ivana",
+      "Petra",
+      "Dejan",
+      "Micko",
+      "Boris",
+      "Jovan",
+      "Milovan",
+      "Dusica",
+    ];
+    const randomIndex = Math.floor(Math.random() * names.length);
+    return names[randomIndex];
+  }
+
+  async randomLastName() {
+    const lastNames = [
+      "Milovanovic",
+      "Glisic",
+      "Majstorovic",
+      "Dejanovic",
+      "Tesla",
+      "Soro",
+      "Cap",
+      "Ljubovic",
+      "Danilovic",
+      "Miksic",
+      "Tomovic",
+    ];
+    const randomIndex = Math.floor(Math.random() * lastNames.length);
+    return lastNames[randomIndex];
+  }
+
+  get randomCustomerId() {
+    return Math.round(Math.random() * 100);
+  }
+
   get randomEmail() {
     return `Pet${this.randomNumber}@gmail.com`;
   }
@@ -85,5 +137,25 @@ export class GeneralMethods {
       envContent += `TOKEN=${token}`;
     }
     fs.writeFileSync(envFilePath, envContent, "utf8");
+  }
+
+  async randomString({ number = 260 }) {
+    let length = number;
+    let characters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * 52));
+    }
+    return result;
+  }
+
+  async randomNumbers({ number = 260 }) {
+    let length = number;
+    let characters = "0123456789";
+    let result = "";
+    for (let i = 0; i < length; i++) {
+      result += characters.charAt(Math.floor(Math.random() * 10));
+    }
+    return result;
   }
 }
