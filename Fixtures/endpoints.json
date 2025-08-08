@@ -7,5 +7,8 @@
   "registerApiEndpoint": "/auth/register",
   "logoutApiEndpoint": "/auth/logout",
   "profileEndpoint": "/profile",
-  "checkoutEndpoint": "/checkout"
+  "checkoutEndpoint": "/checkout",
+  "customersApiEndpoint": "/customers",
+  "productsApiEndpoint": "/products",
+  "cartApiEndpoint": "/cart/"
 }

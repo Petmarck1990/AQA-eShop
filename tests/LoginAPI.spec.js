@@ -4,14 +4,13 @@ import credentials from "../Fixtures/credentials.json";
 import Joi from "joi";
 import dotenv from "dotenv";
 import path from "path";
-import { SchemaValidation } from "../Fixtures/schemaValidation.js";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 let baseUrl;
 
 test.describe("Positive API test cases for Login", async () => {
   test("Login with valid credentials", async ({ authAPI }) => {
-    await authAPI.login({});
+    let body = await authAPI.login({});
   });
 
   test("Login with umlauts", async ({ authAPI }) => {
