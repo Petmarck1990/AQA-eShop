@@ -409,13 +409,6 @@ export class CustomersAPI {
             responseMessages.successfullyUpdateShippingInfo
           );
           expect(body200.shipping_info.customer_id).toBe(customerId);
-          expect(body200.shipping_info.first_name).toBe(firstName);
-          expect(body200.shipping_info.last_name).toBe(lastName);
-          expect(body200.shipping_info.email).toBe(email);
-          expect(body200.shipping_info.phone_number).toBe(phoneNumber);
-          expect(body200.shipping_info.postal_code).toBe(postalCode);
-          expect(typeof body200.shipping_info.postal_code).toBe("number");
-
           return body200;
         case 422:
           expect(response.status()).toBe(422);
@@ -429,6 +422,12 @@ export class CustomersAPI {
           let body401 = await response.json();
           expect(body401.message).toBe("Unauthenticated.");
           return body401;
+        case 404:
+          expect(response.status()).toBe(404);
+          expect(response.ok()).toBeFalsy();
+          let body404 = await response.json();
+          expect(body405.error).toBe(responseMessages.methodNotAllowed);
+          return body404;
         case 405:
           expect(response.status()).toBe(405);
           expect(response.ok()).toBeFalsy();

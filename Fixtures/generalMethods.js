@@ -139,8 +139,8 @@ export class GeneralMethods {
     fs.writeFileSync(envFilePath, envContent, "utf8");
   }
 
-  async randomString260() {
-    let length = 260;
+  async randomString({ number = 260 }) {
+    let length = number;
     let characters = "qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM";
     let result = "";
     for (let i = 0; i < length; i++) {
@@ -149,8 +149,8 @@ export class GeneralMethods {
     return result;
   }
 
-  async randomNumbers260() {
-    let length = 260;
+  async randomNumbers({ number = 260 }) {
+    let length = number;
     let characters = "0123456789";
     let result = "";
     for (let i = 0; i < length; i++) {

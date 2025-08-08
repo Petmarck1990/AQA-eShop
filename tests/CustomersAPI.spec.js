@@ -31,7 +31,7 @@ test.describe("Positive test cases for Customer API", () => {
     customersAPI,
     generalMethods,
   }) => {
-    let body = await customersAPI.updateCustomerInfo({
+    await customersAPI.updateCustomerInfo({
       customerId: generalMethods.randomCustomerId,
     });
   });
@@ -45,18 +45,55 @@ test.describe("Positive test cases for Customer API", () => {
     });
   });
 
+  test("Update cardholder value", async ({ customersAPI, generalMethods }) => {
+    let cardholder = `${await generalMethods.randomFirstName()} ${await generalMethods.randomLastName()}`;
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      customerId: generalMethods.randomCustomerId,
+      cardholder: cardholder,
+    });
+    expect(body.billing_info.cardholder).toBe(cardholder);
+  });
+
   test("Update billing information for customer", async ({
     customersAPI,
     generalMethods,
   }) => {
+    let cardType = "Visa";
     let body = await customersAPI.updateBillingInfoForCustomer({
       customerId: generalMethods.randomCustomerId,
-      cardholder: `${await generalMethods.randomFirstName()} ${await generalMethods.randomLastName()}`,
-      cardType: "Visa",
-      cardNumber: generalMethods.randomCardNumber,
-      cvv: 123,
-      cardExpDate: "12/30",
+      cardType: cardType,
     });
+    expect(body.billing_info.card_type).toBe(cardType);
+  });
+
+  test("Update card number", async ({ customersAPI, generalMethods }) => {
+    let cardNumber = generalMethods.randomCardNumber;
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      customerId: generalMethods.randomCustomerId,
+      cardNumber: cardNumber,
+    });
+    expect(body.billing_info.card_number).toBe(cardNumber);
+  });
+
+  test("Update cvv", async ({ customersAPI, generalMethods }) => {
+    let cvv = 123;
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      customerId: generalMethods.randomCustomerId,
+      cvv: cvv,
+    });
+    expect(body.billing_info.cvv).toBe(cvv);
+  });
+
+  test("Update card expiration date", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let cardExpDate = "12/30";
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      customerId: generalMethods.randomCustomerId,
+      cardExpDate: cardExpDate,
+    });
+    expect(body.billing_info.card_expiration_date).toBe(cardExpDate);
   });
 
   test("Get customer shipping information", async ({
@@ -68,21 +105,84 @@ test.describe("Positive test cases for Customer API", () => {
     });
   });
 
+  test("Update first name field", async ({ customersAPI, generalMethods }) => {
+    let firstName = await generalMethods.randomFirstName();
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      firstName: firstName,
+    });
+    expect(body.shipping_info.first_name).toBe(firstName);
+    expect(typeof body.shipping_info.first_name).toBe("string");
+  });
+
+  test("Update last name field", async ({ customersAPI, generalMethods }) => {
+    let lastName = await generalMethods.randomLastName();
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      lastName: lastName,
+    });
+    expect(body.shipping_info.last_name).toBe(lastName);
+    expect(typeof body.shipping_info.last_name).toBe("string");
+  });
+  test("Update email field", async ({ customersAPI, generalMethods }) => {
+    let email = generalMethods.randomEmail;
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      email: email,
+    });
+    expect(body.shipping_info.email).toBe(email);
+  });
+
+  test("Update street and number field", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let adress = "Random Street 99";
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      adress: adress,
+    });
+    expect(body.shipping_info.street_and_number).toBe(adress);
+  });
+
+  test("Update phone number", async ({ customersAPI, generalMethods }) => {
+    let phoneNr = `+${generalMethods.randomCardNumber}`;
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      phoneNumber: phoneNr,
+    });
+    expect(body.shipping_info.phone_number).toBe(phoneNr);
+  });
+
+  test("Update city", async ({ customersAPI, generalMethods }) => {
+    let city = "Sentomas";
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      city: city,
+    });
+    expect(body.shipping_info.city).toBe(city);
+  });
+
+  test("Update postal code", async ({ customersAPI, generalMethods }) => {
+    let postalCode = 21460;
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      postalCode: postalCode,
+    });
+    expect(body.shipping_info.postal_code).toBe(postalCode);
+    expect(typeof body.shipping_info.postal_code).toBe("number");
+  });
+
   test("Update customer shipping information for a customer", async ({
     customersAPI,
     generalMethods,
   }) => {
+    let country = "Serbia";
     let body = await customersAPI.updateCustomersShippingInfo({
       customerId: generalMethods.randomCustomerId,
-      firstName: await generalMethods.randomFirstName(),
-      lastName: await generalMethods.randomLastName(),
-      email: generalMethods.randomEmail,
-      adress: "Bul Oslobodjenja 12",
-      phoneNumber: `+${generalMethods.randomCardNumber}`,
-      city: "Vrbas",
-      postalCode: 21460,
-      country: "Serbia",
+      country: country,
     });
+    expect(body.shipping_info.country).toBe(country);
   });
 
   test("Customer shipping information schema validation", async ({
@@ -192,7 +292,7 @@ test.describe("Negative test cases for Customer API", async () => {
     );
   });
 
-  test("Try to update billing information with nulls", async ({
+  test("Try to update cardholder field with null", async ({
     customersAPI,
     generalMethods,
   }) => {
@@ -200,49 +300,132 @@ test.describe("Negative test cases for Customer API", async () => {
       statusCode: 422,
       customerId: generalMethods.randomCustomerId,
       cardholder: null,
-      cardType: null,
-      cardNumber: null,
-      cvv: null,
-      cardExpDate: null,
     });
     expect(body.errors.cardholder[0]).toBe(responseMessages.cardholderRequired);
-    expect(body.errors.card_type[0]).toBe(responseMessages.cardTypeRequired);
-    expect(body.errors.card_number[0]).toBe(
-      responseMessages.cardNumberRequired
-    );
-    expect(body.errors.card_expiration_date[0]).toBe(
-      responseMessages.cardExpDateRequired
-    );
-    expect(body.errors.cvv[0]).toBe(responseMessages.cvvRequired);
   });
 
-  test("Try to update billing information with the number of characters over the limit", async ({
+  test("Try to update card type field with null", async ({
     customersAPI,
     generalMethods,
   }) => {
-    let stringOf260 = await generalMethods.randomString260();
-    let numberOf260 = await generalMethods.randomNumbers260();
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardType: null,
+    });
+    expect(body.errors.card_type[0]).toBe(responseMessages.cardTypeRequired);
+  });
+
+  test("Try to update card number field with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardNumber: null,
+    });
+    expect(body.errors.card_number[0]).toBe(
+      responseMessages.cardNumberRequired
+    );
+  });
+
+  test("Try to update cvv field with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cvv: null,
+    });
+    expect(body.errors.cvv[0]).toBe(responseMessages.cvvRequired);
+  });
+
+  test("Try to update card expitarion field with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardExpDate: null,
+    });
+    expect(body.errors.card_expiration_date[0]).toBe(
+      responseMessages.cardExpDateRequired
+    );
+  });
+
+  test("Try to update cardholder field with the number of characters over the limit", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
     let body = await customersAPI.updateBillingInfoForCustomer({
       statusCode: 422,
       customerId: generalMethods.randomCustomerId,
       cardholder: stringOf260,
-      cardType: stringOf260,
-      cardNumber: numberOf260,
-      cvv: numberOf260,
-      cardExpDate: numberOf260,
     });
     expect(body.errors.cardholder[0]).toBe(
       responseMessages.cardholderLessThan255
     );
+  });
+
+  test("Try to update card type field with the number of characters over the limit", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardType: stringOf260,
+    });
     expect(body.errors.card_type[0]).toBe(responseMessages.cardTypeLessThan20);
+  });
+
+  test("Try to update card number field with the number of characters over the limit", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let numberOf260 = await generalMethods.randomNumbers({});
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardNumber: numberOf260,
+    });
     expect(body.errors.card_number[0]).toBe(
       responseMessages.cardNumberLessThan20
     );
+  });
+
+  test("Try to update cvv field with the number of characters over the limit", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let numberOf260 = await generalMethods.randomNumbers({});
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cvv: numberOf260,
+    });
+    expect(body.errors.cvv[0]).toBe(responseMessages.cvvMustBeIntiger);
+    expect(body.errors.cvv[1]).toBe(responseMessages.cvvMustBe3Digits);
+  });
+
+  test("Try to update card expiration date field with the number of characters over the limit", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let numberOf260 = await generalMethods.randomNumbers({});
+    let body = await customersAPI.updateBillingInfoForCustomer({
+      statusCode: 422,
+      customerId: generalMethods.randomCustomerId,
+      cardExpDate: numberOf260,
+    });
     expect(body.errors.card_expiration_date[0]).toBe(
       responseMessages.cardExpDateInvalidFormat
     );
-    expect(body.errors.cvv[0]).toBe(responseMessages.cvvMustBeIntiger);
-    expect(body.errors.cvv[1]).toBe(responseMessages.cvvMustBe3Digits);
   });
 
   test("Try to update card number in billing information with less than 12 characters", async ({
@@ -318,7 +501,7 @@ test.describe("Negative test cases for Customer API", async () => {
     });
   });
 
-  test("Try to update shipping information without country", async ({
+  test("Try to update first name with null", async ({
     customersAPI,
     generalMethods,
   }) => {
@@ -326,96 +509,282 @@ test.describe("Negative test cases for Customer API", async () => {
       customerId: generalMethods.randomCustomerId,
       statusCode: 422,
       firstName: null,
-      lastName: null,
-      email: null,
-      adress: null,
-      phoneNumber: null,
-      city: null,
-      postalCode: null,
-      country: null,
     });
     expect(body.errors.first_name[0]).toBe(responseMessages.firstNameRequired);
-    expect(body.errors.last_name[0]).toBe(responseMessages.lastNameRequired);
-    expect(body.errors.email[0]).toBe(responseMessages.emailRequired);
-    expect(body.errors.street_and_number[0]).toBe(
-      responseMessages.adressRequired
-    );
-    expect(body.errors.phone_number[0]).toBe(responseMessages.phoneNrRequired);
-    expect(body.errors.city[0]).toBe(responseMessages.cityRequired);
-    expect(body.errors.postal_code[0]).toBe(
-      responseMessages.postalCodeRequired
-    );
-    expect(body.errors.country[0]).toBe(responseMessages.countryRequired);
   });
 
-  test("Try to update shipping information with the number of characters more than 255", async ({
+  test("Try to update last name with null", async ({
     customersAPI,
     generalMethods,
   }) => {
-    let stringOf260 = await generalMethods.randomString260();
-    let numberOf260 = await generalMethods.randomNumbers260();
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      lastName: null,
+    });
+    expect(body.errors.last_name[0]).toBe(responseMessages.lastNameRequired);
+  });
+
+  test("Try to update email with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      email: null,
+    });
+    expect(body.errors.email[0]).toBe(responseMessages.emailRequired);
+  });
+
+  test("Try to update street and number with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      adress: null,
+    });
+    expect(body.errors.street_and_number[0]).toBe(
+      responseMessages.adressRequired
+    );
+  });
+
+  test("Try to update phone number with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      phoneNumber: null,
+    });
+    expect(body.errors.phone_number[0]).toBe(responseMessages.phoneNrRequired);
+  });
+
+  test("Try to update city with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      city: null,
+    });
+    expect(body.errors.city[0]).toBe(responseMessages.cityRequired);
+  });
+
+  test("Try to update postal code with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      postalCode: null,
+    });
+    expect(body.errors.postal_code[0]).toBe(
+      responseMessages.postalCodeRequired
+    );
+  });
+
+  test("Try to update country with null", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      country: null,
+    });
+    expect(body.errors.country[0]).toBe(responseMessages.countryRequired);
+  });
+
+  test("Try to update first name with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
     let body = await customersAPI.updateCustomersShippingInfo({
       customerId: generalMethods.randomCustomerId,
       statusCode: 422,
       firstName: stringOf260,
-      lastName: stringOf260,
-      email: `${stringOf260}@mail.com`,
-      adress: stringOf260,
-      phoneNumber: numberOf260,
-      city: stringOf260,
-      postalCode: numberOf260,
-      country: stringOf260,
     });
     expect(body.errors.first_name[0]).toBe(
       responseMessages.firstNameLessThan255
     );
+  });
+
+  test("Try to update last name with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      lastName: stringOf260,
+    });
     expect(body.errors.last_name[0]).toBe(responseMessages.lastNameLessThan255);
+  });
+
+  test("Try to update email with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      email: `${stringOf260}@mail.com`,
+    });
     expect(body.errors.email[0]).toBe(responseMessages.emailLessThan255);
+  });
+
+  test("Try to update street and number with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      adress: stringOf260,
+    });
     expect(body.errors.street_and_number[0]).toBe(
       responseMessages.adressLessThan255
     );
+  });
+
+  test("Try to update phone number with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let numberOf260 = await generalMethods.randomNumbers({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      phoneNumber: numberOf260,
+    });
     expect(body.errors.phone_number[0]).toBe(
       responseMessages.phoneNrLessTnah255
     );
+  });
+
+  test("Try to update city with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      city: stringOf260,
+    });
     expect(body.errors.city[0]).toBe(responseMessages.cityLesThan255);
+  });
+
+  test("Try to update postal code with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let numberOf260 = await generalMethods.randomNumbers({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      postalCode: numberOf260,
+    });
     expect(body.errors.postal_code[0]).toBe(
       responseMessages.postalCodeMustBeIntiger
     );
     expect(body.errors.postal_code[1]).toBe(
       responseMessages.postalCodeBetween4And10
     );
+  });
+
+  test("Try to update country with the number of characters more than 255", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let stringOf260 = await generalMethods.randomString({});
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      country: stringOf260,
+    });
     expect(body.errors.country[0]).toBe(responseMessages.countryLessThan255);
   });
 
-  test("Try to update shipping information with phone number,city and adress - less then 6 characters and invalid format", async ({
+  test("Try to update first name with less then 6 characters and invalid format", async ({
     customersAPI,
     generalMethods,
   }) => {
     let body = await customersAPI.updateCustomersShippingInfo({
       customerId: generalMethods.randomCustomerId,
       statusCode: 422,
-      firstName: "!@123",
-      lastName: "!@123",
-      phoneNumber: "1s",
-      adress: "!",
-      city: "1",
+      firstName: "!@2",
     });
     expect(body.errors.first_name[0]).toBe(
       responseMessages.firstNameInvalidFormat
     );
-    expect(body.errors.last_name[0]).toBe(
-      responseMessages.lastNameInvalidFormat
-    );
+  });
+
+  test("Try to update phone number with less then 6 characters and invalid format", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      phoneNumber: "1s",
+    });
     expect(body.errors.phone_number[0]).toBe(responseMessages.phoneNrMinimum6);
     expect(body.errors.phone_number[1]).toBe(
       responseMessages.phoneNrInvalidFormat
     );
+  });
+
+  test("Try to update last name with less then 6 characters and invalid format", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      lastName: "!@123",
+    });
+    expect(body.errors.last_name[0]).toBe(
+      responseMessages.lastNameInvalidFormat
+    );
+  });
+
+  test("Try to update street and number with less then 6 characters and invalid format", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      adress: "!",
+    });
     expect(body.errors.street_and_number[0]).toBe(
       responseMessages.adressMoreThan3Char
     );
     expect(body.errors.street_and_number[1]).toBe(
       responseMessages.adressInvalidFormat
     );
+  });
+
+  test("Try to update city with less then 6 characters and invalid format", async ({
+    customersAPI,
+    generalMethods,
+  }) => {
+    let body = await customersAPI.updateCustomersShippingInfo({
+      customerId: generalMethods.randomCustomerId,
+      statusCode: 422,
+      city: "1",
+    });
     expect(body.errors.city[0]).toBe(responseMessages.cityInvalidFormat);
   });
 });
