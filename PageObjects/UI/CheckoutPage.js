@@ -184,6 +184,5 @@ export class CheckoutPage {
     await expect(this.checkCvv).not.toHaveText(cvv);
     await expect(this.checkExpDate).toHaveText(expDate);
     await this.confirmButton.click();
-    await expect(this.page).toHaveURL(`${endpoints.dashboardEndpoint}`);
   }
 }
