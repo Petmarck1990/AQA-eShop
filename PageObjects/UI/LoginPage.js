@@ -66,10 +66,20 @@ export class LoginPage {
     );
   }
 
-  async loginWithToken({ page, token = process.env.TOKEN }) {
+  async loginWithToken({
+    page,
+    token = process.env.TOKEN,
+    cartId = process.env.USER_ID,
+  }) {
     let context = await page.context();
     await context.addInitScript((token) => {
       window.localStorage.setItem("token", token);
     }, token);
+    await context.addInitScript((cartId) => {
+      window.localStorage.setItem("cartId", cartId);
+    }, cartId);
+    await context.addInitScript((cartId) => {
+      window.localStorage.setItem("userId", cartId);
+    }, cartId);
   }
 }

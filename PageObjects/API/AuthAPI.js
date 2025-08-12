@@ -32,7 +32,7 @@ export class AuthAPI {
           },
         }
       );
-
+      // console.log(await response.json());
       switch (statusCode) {
         case 200:
           expect(response.status()).toBe(200);
@@ -42,6 +42,7 @@ export class AuthAPI {
           expect(body200.user.password).not.toBe(password);
           expect(body200.message).toBe(responseMessages.loginSuccessfully);
           expect(body200.status).toBe("Success");
+          let id = body200.user.id;
           let token = body200.auth.token;
           expect(typeof token).toBe("string");
           expect(token).toMatch(
@@ -54,7 +55,7 @@ export class AuthAPI {
           if (returnBodyOnly) {
             return body200;
           } else {
-            return token;
+            return { token, id };
           }
         case 422:
           expect(response.status()).toBe(422);

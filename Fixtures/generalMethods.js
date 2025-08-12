@@ -134,7 +134,21 @@ export class GeneralMethods {
     if (tokenExists) {
       envContent = envContent.replace(tokenRegex, `TOKEN=${token}`);
     } else {
-      envContent += `TOKEN=${token}`;
+      envContent += `\nTOKEN=${token}`;
+    }
+    fs.writeFileSync(envFilePath, envContent, "utf8");
+  }
+
+  async writeIdInEnvFile(id) {
+    const envFilePath = path.resolve(__dirname, "../.env");
+    let envContent = "";
+    envContent = fs.readFileSync(envFilePath, "utf8");
+    const idRegex = /^(USER_ID)=.*/m;
+    const idExists = idRegex.test(envContent);
+    if (idExists) {
+      envContent = envContent.replace(idRegex, `USER_ID=${id}`);
+    } else {
+      envContent += `\nUSER_ID=${id}`;
     }
     fs.writeFileSync(envFilePath, envContent, "utf8");
   }

@@ -11,6 +11,7 @@ import { AuthAPI } from "./API/AuthAPI.js";
 import { CustomersAPI } from "./API/CustomersAPI.js";
 import { ProductsAPI } from "./API/ProductsAPI.js";
 import { CartsAPI } from "./API/CarstAPI.js";
+import { CheckoutPage } from "./UI/CheckoutPage.js";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
@@ -53,6 +54,9 @@ const testPages = base.extend({
   },
   cartsAPI: async ({ request }, use) => {
     await use(new CartsAPI(request));
+  },
+  checkoutPage: async ({ wpage }, use) => {
+    await use(new CheckoutPage(wpage));
   },
 });
 export const test = testPages;
