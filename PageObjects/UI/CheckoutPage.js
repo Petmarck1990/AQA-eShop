@@ -76,13 +76,15 @@ export class CheckoutPage {
     );
   }
 
+  async getProduct(product) {
+    return this.page.locator(`bla bla ${product}`);
+  }
+
   async rewiewItems() {
     await expect(this.checkMessageFreeOfCharge).toBeVisible();
     await expect(this.notWithMoney).toBeVisible();
     await expect(this.productExist).toBeVisible();
-    const responsePromise = this.page.waitForResponse(
-      `${process.env.BASE_URL_API}${endpoints.customersApiEndpoint}/${process.env.USER_ID}/shipping-info`
-    );
+    const responsePromise = this.page.waitForResponse(`**/shipping-info`);
     await this.nextStepButton.click();
     const response = await responsePromise;
     await expect(response.ok()).toBeTruthy();
@@ -99,28 +101,23 @@ export class CheckoutPage {
     postalCode = this.postalCodeValue,
     country = this.countryValue,
   }) {
-    await this.page.setViewportSize({ width: 1600, height: 1200 });
     await this.makeChanges.click();
-    await this.firstName.fill(await firstName);
-    await expect(this.firstName).toHaveValue(await firstName);
-    await this.lastName.fill(await lastName);
-    await expect(this.lastName).toHaveValue(await lastName);
-    await this.email.fill(await email);
-    await expect(this.email).toHaveValue(await email);
-    await this.phoneNumber.fill(await phoneNumber);
-    await expect(this.phoneNumber).toHaveValue(await phoneNumber);
-    await this.adress.fill(adress);
-    await expect(this.adress).toHaveValue(adress);
-    await this.city.fill(city);
-    await expect(this.city).toHaveValue(city);
-    await this.postalCode.fill(postalCode);
-    await expect(this.postalCode).toHaveValue(postalCode);
-    await this.country.fill(country);
-    await expect(this.country).toHaveValue(country);
+    let inputTextData = [
+      { locator: this.firstName, value: firstName },
+      { locator: this.lastName, value: lastName },
+      { locator: this.email, value: email },
+      { locator: this.phoneNumber, value: phoneNumber },
+      { locator: this.adress, value: adress },
+      { locator: this.city, value: city },
+      { locator: this.postalCode, value: postalCode },
+      { locator: this.country, value: country },
+    ];
+    for (let { locator, value } of inputTextData) {
+      await locator.fill(await value);
+      await expect(locator).toHaveValue(await value);
+    }
     await this.updateButton.click();
-    const responsePromise = this.page.waitForResponse(
-      `${process.env.BASE_URL_API}${endpoints.customersApiEndpoint}/${process.env.USER_ID}/billing-info`
-    );
+    const responsePromise = this.page.waitForResponse(`**/billing-info`);
     await this.nextStepShippingInfo.click();
     const response = await responsePromise;
     await expect(response.ok()).toBeTruthy();
@@ -132,25 +129,48 @@ export class CheckoutPage {
     cardNumber = this.cardNumberValue,
     cvv = this.cvvValue,
   }) {
-    await this.page.setViewportSize({ width: 1600, height: 1200 });
     await this.makeChanges.click();
-    await this.cardholder.fill(await cardholder);
-    await expect(this.cardholder).toHaveValue(await cardholder);
-    await this.cardType.click();
-    await this.masterCardSelect.click();
-    await expect(this.cardType).toHaveText("MasterCardMasterCard");
-    await this.cardNumber.fill(await cardNumber);
-    await expect(this.cardNumber).toHaveValue(await cardNumber);
-    await this.cvv.fill(cvv);
-    await expect(this.cvv).toHaveValue(cvv);
-    await this.expirationMonthField.click();
-    await this.expirationMonthSelect.click();
-    await expect(this.expirationMonthField).toHaveText("1111");
-    await this.expirationYearField.click();
-    await this.expirationYearSelect.click();
-    await expect(this.expirationYearField).toHaveText("20302030");
+    let textData = [
+      { locator: this.cardholder, value: cardholder },
+      { locator: this.cardNumber, value: cardNumber },
+      { locator: this.cvv, value: cvv },
+    ];
+    for (let { locator, value } of textData) {
+      await locator.fill(await value);
+      await expect(locator).toHaveValue(await value);
+    }
+    let dropdownData = [
+      {
+        checkField: this.cardType,
+        selectData: this.masterCardSelect,
+        expectValue: "MasterCardMasterCard",
+      },
+      {
+        checkField: this.expirationMonthField,
+        selectData: this.expirationMonthSelect,
+        expectValue: "1111",
+      },
+      {
+        checkField: this.expirationYearField,
+        selectData: this.expirationYearSelect,
+        expectValue: "20302030",
+      },
+    ];
+    for (let { checkField, selectData, expectValue } of dropdownData) {
+      await checkField.click();
+      await selectData.click();
+      await expect(checkField).toHaveText(expectValue);
+    }
     await this.updateButtonLabel.click();
+    const responsePromiseBillingInfo =
+      this.page.waitForResponse("**/billing-info");
+    const responsePromiseShippingInfo =
+      this.page.waitForResponse("**/shipping-info");
     await this.nextStepButton.click();
+    const responseBillingInfo = await responsePromiseBillingInfo;
+    const responseShippingInfo = await responsePromiseShippingInfo;
+    await expect(responseBillingInfo.ok()).toBeTruthy();
+    await expect(responseShippingInfo.ok()).toBeTruthy();
     await expect(this.shippingInfoH3).toBeVisible();
   }
 
@@ -169,20 +189,32 @@ export class CheckoutPage {
     cvv = this.cvvValue,
     expDate = this.expDateValue,
   }) {
-    await this.page.setViewportSize({ width: 1600, height: 1080 });
-    await expect(this.checkFirsName).toHaveText(await firstName);
-    await expect(this.checkLastName).toHaveText(await lastName);
-    await expect(this.checkEmail).toHaveText(await email);
-    await expect(this.checkPhone).toHaveText(await phone);
-    await expect(this.checkAdress).toHaveText(adress);
-    await expect(this.checkCity).toHaveText(city);
-    await expect(this.checkPostalCode).toHaveText(postalCode);
-    await expect(this.checkCountry).toHaveText(country);
-    await expect(this.checkCardholder).toHaveText(await cardholder);
-    await expect(this.checkCardType).toHaveText(cardType);
-    await expect(this.checkCardNumber).not.toHaveText(await cardNumber);
-    await expect(this.checkCvv).not.toHaveText(cvv);
-    await expect(this.checkExpDate).toHaveText(expDate);
+    let checkData = [
+      { locator: this.checkFirsName, value: firstName },
+      { locator: this.checkLastName, value: lastName },
+      { locator: this.checkEmail, value: email },
+      { locator: this.checkPhone, value: phone },
+      { locator: this.checkAdress, value: adress },
+      { locator: this.checkCity, value: city },
+      { locator: this.checkPostalCode, value: postalCode },
+      { locator: this.checkCountry, value: country },
+      { locator: this.checkCardholder, value: cardholder },
+      { locator: this.checkCardType, value: cardType },
+      { locator: this.checkCardNumber, value: cardNumber },
+      { locator: this.checkCvv, value: cvv },
+      { locator: this.checkExpDate, value: expDate },
+    ];
+
+    for (let { locator, value } of checkData) {
+      if (
+        locator === (await this.checkCardNumber) ||
+        locator === (await this.checkCvv)
+      ) {
+        await expect(locator).not.toHaveText(await value);
+      } else {
+        await expect(locator).toHaveText(await value);
+      }
+    }
     await this.confirmButton.click();
   }
 }
