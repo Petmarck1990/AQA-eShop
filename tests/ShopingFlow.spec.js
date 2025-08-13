@@ -12,12 +12,13 @@ test.describe("Shoping flow", async () => {
     await loginPage.loginWithToken({ page });
   });
 
-  test("Add graphic card in cart", async ({
+  test("Add product in cart and buy product", async ({
     dashboardPage,
     checkoutPage,
     generalMethods,
   }) => {
     await generalMethods.goToPage({ url: endpoints.dashboardEndpoint });
+    await dashboardPage.cartCheckAndEmpty();
     await dashboardPage.addProductToCart();
     await expect(page).toHaveURL(`${endpoints.checkoutEndpoint}`);
     await checkoutPage.rewiewItems();

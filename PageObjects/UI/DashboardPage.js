@@ -34,9 +34,7 @@ export class DashboardPage {
     this.priceLocator = page.locator(
       "h1:has-text('NVIDIA GeForce RTX 3080 Ti') >> .. >> span.font-semibold"
     );
-    this.emptyCartMessage = page.locator(
-      ".z-10.text-3xl:has-text('No items in cart. Add some!')"
-    );
+    this.emptyCartMessage = page.getByText("No items in cart. Add some!");
     this.total = page.locator(".text-lg.mb-4");
     this.clearButton = page.getByText("Clear");
   }
@@ -44,8 +42,8 @@ export class DashboardPage {
   async cartCheckAndEmpty() {
     await this.cart.click();
     await expect(this.sidebarOpen).toBeVisible();
-    let message = expect(this.emptyCartMessage).toBeTruthy();
-    if (!message) {
+    let message = await this.emptyCartMessage.isVisible();
+    if (message) {
       await this.cart.click();
     } else {
       await this.clearButton.click();
