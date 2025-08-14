@@ -6,6 +6,7 @@ test.describe("Login user and store token in file for later use", async () => {
     generalMethods,
   }) => {
     let token = await authAPI.login({});
-    await generalMethods.writeTokenInEnvFile(token);
+    await generalMethods.writeTokenInEnvFile(token.token);
+    await generalMethods.writeIdInEnvFile(token.id);
   });
 });
