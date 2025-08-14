@@ -2,6 +2,7 @@ import { expect } from "@playwright/test";
 
 export class DashboardPage {
   constructor(page) {
+    this.page = page;
     this.enabledButton = page.locator(
       "button.p-button[data-pc-name='button']:not([disabled]) svg.h-6"
     );
@@ -15,11 +16,6 @@ export class DashboardPage {
     this.loginBtn = page.locator("#loginBtn");
     this.filterGpu = page.locator("a:has-text('GPUs')");
     this.applyFilters = page.getByLabel("Apply filters");
-    this.product = page.locator(
-      'div[test-id="product-card"]:has(h1:has-text("NVIDIA GeForce RTX 3080 Ti"))'
-    );
-    this.addProduct = this.product.locator("button");
-    this.productButton = this.product.locator(".hover:fill-indigo-300");
     this.card = page.locator("[test-data='product-container']");
     this.button = page.locator('button:has-text("flex")');
     this.productCards = page.locator("[test-id='product-card']");
@@ -31,9 +27,6 @@ export class DashboardPage {
     this.addButton = page.locator(".p-button-icon.pi-plus");
     this.removeButton = page.locator(".p-button-icon.pi-minus");
     this.checkout = page.locator("[aria-label='Checkout']");
-    this.priceLocator = page.locator(
-      "h1:has-text('NVIDIA GeForce RTX 3080 Ti') >> .. >> span.font-semibold"
-    );
     this.emptyCartMessage = page.getByText("No items in cart. Add some!");
     this.total = page.locator(".text-lg.mb-4");
     this.clearButton = page.getByText("Clear");
@@ -53,7 +46,7 @@ export class DashboardPage {
   }
 
   async addProductToCart() {
-    await this.findAvailableProducts();
+    await this.findSpecificProduct({});
     await this.confirmationMessage.waitFor({ state: "visible" });
     await this.cart.click();
     await expect(this.sidebarOpen).toBeVisible();
@@ -76,5 +69,21 @@ export class DashboardPage {
     }
     expect(activeButtonLocators.length).toBeGreaterThan(0);
     return activeButtonLocators[0].click();
+  }
+
+  async findSpecificProduct({ name = "NVIDIA GeForce RTX 3080 Ti" }) {
+    let specificProduct = await this.page.locator(
+      `div[test-id="product-card"]:has(h1:has-text("${name}"))`
+    );
+    let button = await specificProduct.locator("button");
+    let className = await button.getAttribute("class");
+    let isDisabled = className.includes("p-disabled");
+    if (specificProduct) {
+      if (!isDisabled) {
+        return button.click();
+      } else {
+        throw new Error(`${name} is Out of Stock`);
+      }
+    }
   }
 }

@@ -7,6 +7,7 @@ import endpoints from "../Fixtures/endpoints.json";
 let page;
 
 test.describe("Shoping flow", async () => {
+  test.use({ viewport: { width: 1600, height: 800 } });
   test.beforeEach(async ({ wpage, loginPage }) => {
     page = wpage;
     await loginPage.loginWithToken({ page });
@@ -19,6 +20,7 @@ test.describe("Shoping flow", async () => {
   }) => {
     await generalMethods.goToPage({ url: endpoints.dashboardEndpoint });
     await dashboardPage.cartCheckAndEmpty();
+    // await dashboardPage.findSpecificProduct({});
     await dashboardPage.addProductToCart();
     await expect(page).toHaveURL(`${endpoints.checkoutEndpoint}`);
     await checkoutPage.rewiewItems();
