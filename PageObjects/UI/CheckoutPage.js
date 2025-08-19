@@ -2,6 +2,7 @@ import { expect } from "../BaseObject.js";
 import endpoints from "../../Fixtures/endpoints.json";
 import { GeneralMethods } from "../../Fixtures/generalMethods.js";
 let generalMethods = new GeneralMethods();
+const store = require("../../Utils/globalStorage.js");
 
 export class CheckoutPage {
   constructor(page) {
@@ -45,18 +46,6 @@ export class CheckoutPage {
       "div[role='alert]:has-text('Billing information updated!')"
     );
     this.shippingInfoH3 = page.locator("h3:has-text('Shipping information')");
-    this.firstNameValue = generalMethods.randomFirstName();
-    this.lastNameValue = generalMethods.randomLastName();
-    this.emailValue = generalMethods.randomEmail;
-    this.phoneNumberValue = `+${generalMethods.randomCardNumber}`;
-    this.adressValue = "Brace Ribnikar 12";
-    this.cityValue = "Novi Sad";
-    this.postalCodeValue = "21000";
-    this.countryValue = "Serbia";
-    this.cardholderValue = generalMethods.randomFirstName();
-    this.cardNumberValue = generalMethods.randomCardNumber;
-    this.cvvValue = "123";
-    this.cardTypeValue = "MasterCard";
     this.checkFirsName = page.locator("span:text-is('First Name') + span");
     this.checkLastName = page.locator("span:text-is('Last Name') + span");
     this.checkEmail = page.locator("span:text-is('Email') + span");
@@ -74,6 +63,11 @@ export class CheckoutPage {
     this.confirmButton = page.locator(
       ".p-button:has-text('Place your order!')"
     );
+    this.goBackFinalizePurchase = page.getByLabel("...or not?");
+    this.goBackBillingInformation = page.locator(
+      "[data-pc-name='button'] [data-pc-section='icon']"
+    );
+    this.addProductReviewPage = page.locator(".p-button-icon.pi-plus");
   }
 
   async getProduct(product) {
@@ -92,14 +86,14 @@ export class CheckoutPage {
   }
 
   async addCustomerInfo({
-    firstName = this.firstNameValue,
-    lastName = this.lastNameValue,
-    email = this.emailValue,
-    adress = this.adressValue,
-    phoneNumber = this.phoneNumberValue,
-    city = this.cityValue,
-    postalCode = this.postalCodeValue,
-    country = this.countryValue,
+    firstName = store.get("firstName"),
+    lastName = store.get("lastName"),
+    email = store.get("email"),
+    adress = store.get("adress"),
+    phoneNumber = store.get("phoneNumber"),
+    city = store.get("city"),
+    postalCode = store.get("postalCode"),
+    country = store.get("country"),
   }) {
     await this.makeChanges.click();
     let inputTextData = [
@@ -125,9 +119,11 @@ export class CheckoutPage {
   }
 
   async addBillingInfo({
-    cardholder = this.firstNameValue,
-    cardNumber = this.cardNumberValue,
-    cvv = this.cvvValue,
+    cardholder = store.get("firstName"),
+    cardNumber = store.get("cardNumber"),
+    cvv = store.get("cvv"),
+    cardType = this.masterCardSelect,
+    expMonth = this.expirationMonthSelect,
   }) {
     await this.makeChanges.click();
     let textData = [
@@ -142,7 +138,7 @@ export class CheckoutPage {
     let dropdownData = [
       {
         checkField: this.cardType,
-        selectData: this.masterCardSelect,
+        selectData: cardType,
         expectValue: "MasterCardMasterCard",
       },
       {
@@ -175,18 +171,18 @@ export class CheckoutPage {
   }
 
   async checkFinalInformation({
-    firstName = this.firstNameValue,
-    lastName = this.lastNameValue,
-    email = this.emailValue,
-    phone = this.phoneNumberValue,
-    adress = this.adressValue,
-    city = this.cityValue,
-    postalCode = this.postalCodeValue,
-    country = this.countryValue,
-    cardholder = this.firstNameValue,
-    cardType = this.cardTypeValue,
-    cardNumber = this.cardNumberValue,
-    cvv = this.cvvValue,
+    firstName = store.get("firstName"),
+    lastName = store.get("lastName"),
+    email = store.get("email"),
+    phone = store.get("phoneNumber"),
+    adress = store.get("adress"),
+    city = store.get("city"),
+    postalCode = store.get("postalCode"),
+    country = store.get("country"),
+    cardholder = store.get("firstName"),
+    cardType = store.get("cardType"),
+    cardNumber = store.get("cardNumber"),
+    cvv = store.get("cvv"),
     expDate = this.expDateValue,
   }) {
     let checkData = [
@@ -215,6 +211,5 @@ export class CheckoutPage {
         await expect(locator).toHaveText(await value);
       }
     }
-    await this.confirmButton.click();
   }
 }
