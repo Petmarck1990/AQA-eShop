@@ -12,5 +12,10 @@
     "@types/node": "^24.0.14",
     "dotenv": "^17.2.0",
     "joi": "^17.13.3"
+  },
+  "dependencies": {
+    "@types/k6": "^1.2.0",
+    "axios": "^1.11.0",
+    "save-dev": "^0.0.1-security"
   }
 }

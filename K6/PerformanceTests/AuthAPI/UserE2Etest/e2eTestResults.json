@@ -1,0 +1,157 @@
+{
+    "metrics": {
+        "group_duration": {
+            "avg": 158.32199132522132,
+            "min": 143.3005,
+            "med": 156.7120835,
+            "max": 231.239583,
+            "p(90)": 167.9145256,
+            "p(95)": 173.40556265
+        },
+        "http_req_tls_handshaking": {
+            "avg": 56.43353982300884,
+            "min": 48.315,
+            "med": 55.8175,
+            "max": 70.93,
+            "p(90)": 61.188,
+            "p(95)": 62.53525
+        },
+        "http_req_waiting": {
+            "avg": 51.07492920353985,
+            "min": 45.625,
+            "med": 49.905,
+            "max": 99.181,
+            "p(90)": 53.975,
+            "p(95)": 57.83999999999999
+        },
+        "http_req_blocked": {
+            "max": 180.988,
+            "p(90)": 113.2065,
+            "p(95)": 115.43249999999999,
+            "avg": 106.75580973451325,
+            "min": 95.732,
+            "med": 106.1645
+        },
+        "vus_max": {
+            "value": 50,
+            "min": 50,
+            "max": 50
+        },
+        "homepage_failures": {
+            "passes": 0,
+            "fails": 0,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "iterations": {
+            "count": 226,
+            "rate": 18.634619957644993
+        },
+        "delete_failures": {
+            "passes": 0,
+            "fails": 0,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "data_received": {
+            "count": 627728,
+            "rate": 51758.72883527688
+        },
+        "http_req_receiving": {
+            "avg": 0.13327433628318594,
+            "min": 0.041,
+            "med": 0.1095,
+            "max": 0.882,
+            "p(90)": 0.21700000000000003,
+            "p(95)": 0.27425
+        },
+        "iteration_duration": {
+            "p(90)": 167.9511665,
+            "p(95)": 173.02883325,
+            "avg": 158.37344669026527,
+            "min": 143.336666,
+            "med": 156.8015625,
+            "max": 231.300291
+        },
+        "http_reqs": {
+            "rate": 18.634619957644993,
+            "count": 226
+        },
+        "http_req_duration": {
+            "min": 45.839,
+            "med": 50.105999999999995,
+            "max": 99.46,
+            "p(90)": 54.191,
+            "p(95)": 58.02824999999999,
+            "avg": 51.33141592920352
+        },
+        "http_req_sending": {
+            "min": 0.039,
+            "med": 0.106,
+            "max": 1.581,
+            "p(90)": 0.18050000000000002,
+            "p(95)": 0.21099999999999988,
+            "avg": 0.12321238938053096
+        },
+        "data_sent": {
+            "count": 156917,
+            "rate": 12938.445397760086
+        },
+        "vus": {
+            "max": 5,
+            "value": 5,
+            "min": 1
+        },
+        "http_req_failed": {
+            "passes": 226,
+            "fails": 0,
+            "thresholds": {
+                "rate<0.01": true
+            },
+            "value": 1
+        },
+        "register_failures": {
+            "passes": 0,
+            "fails": 0,
+            "thresholds": {
+                "rate<0.01": false
+            },
+            "value": 0
+        },
+        "http_req_connecting": {
+            "avg": 49.905402654867245,
+            "min": 43.977,
+            "med": 49.433499999999995,
+            "max": 64.762,
+            "p(90)": 53.9305,
+            "p(95)": 55.513
+        }
+    },
+    "root_group": {
+        "id": "d41d8cd98f00b204e9800998ecf8427e",
+        "groups": {
+            "E2E test for register a new user, access protected page and delete user": {
+                "path": "::E2E test for register a new user, access protected page and delete user",
+                "id": "59d862fd0cc3debea05c8b4fe309625e",
+                "groups": {
+                    "Registered new User": {
+                        "id": "e3aa78ebb7abef433c2015f7881815ec",
+                        "groups": {},
+                        "checks": {},
+                        "name": "Registered new User",
+                        "path": "::E2E test for register a new user, access protected page and delete user::Registered new User"
+                    }
+                },
+                "checks": {},
+                "name": "E2E test for register a new user, access protected page and delete user"
+            }
+        },
+        "checks": {},
+        "name": "",
+        "path": ""
+    }
+}
