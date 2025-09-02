@@ -1,24 +1,14 @@
-import { check, sleep } from "k6";
+import { sleep } from "k6";
 import http from "k6/http";
-import { SharedArray } from "k6/data";
-import { Trend, Rate, Counter } from "k6/metrics";
 import { group } from "k6";
+import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
 import {
   getRandomUser,
   getProducts,
   usersData,
+  checkResponse,
 } from "../../../Helpers/helpers.js";
-import {
-  getCustomersFailures,
-  getCustomersDuration,
-  getCustomersErrors,
-  getCustomerByIdFailures,
-  getCustomerByIdDuration,
-  getCustomersByIdErrors,
-  getBillingInfoFailures,
-  getBillingInfoDuration,
-  getBillingInfoErrors,
-} from "../../../Helpers/customMetrics.js";
+import { iterationDuration } from "../../../Helpers/customMetrics.js";
 
 const baseUrl = JSON.parse(open("../../../TestData/k6BaseUrl.json")).baseUrlApi;
 
@@ -47,14 +37,23 @@ export const options = {
       exec: "allTests",
       startVUs: 0,
       stages: [
-        { duration: "5s", target: 10 },
-        { duration: "10s", target: 10 },
-        { duration: "5s", target: 0 },
+        { duration: "3s", target: 5 },
+        { duration: "8s", target: 5 },
+        { duration: "3s", target: 0 },
       ],
     },
   },
   thresholds: {
-    http_req_failed: ["rate<0.10"],
+    http_req_failed: ["rate<0.05"],
+    "custom_iteration_duration{endpoint:getCustomers}": ["avg<3000"],
+    "custom_iteration_duration{endpoint:customerById}": ["avg<3000"],
+    "custom_iteration_duration{endpoint:getBillingInfo}": ["avg<3000"],
+    "request_failures{endpoint:getCustomers}": ["rate<0.05"],
+    "request_failures{endpoint:customerById}": ["rate<0.05"],
+    "request_failures{endpoint:getBillingInfo}": ["rate<0.05"],
+    "request_errors{endpoint:getCustomers}": ["rate<0.05"],
+    "request_errors{endpoint:customerById}": ["rate<0.05"],
+    "request_errors{endpoint:getBillingInfo}": ["rate<0.05"],
   },
 };
 // Set token and user ID before groups will share same token and user Id across all grups and will generate new
@@ -65,23 +64,23 @@ export function allTests(data) {
   let userId = user.userId;
   group("Get all customers", function () {
     let url = `${baseUrl}/customers`;
-    let headers = {
+    let headersTags = {
       headers: {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      tags: {
+        endpoint: "getCustomers",
+      },
     };
 
     try {
-      let response = http.get(url, headers);
-
-      getCustomersDuration.add(response.timings.duration);
-      getCustomersFailures.add(response.status !== 200);
-      getCustomersErrors.add(response.status != 200);
-
-      check(response, {
-        "Response code is 200": (res) => res.status === 200,
+      let response = http.get(url, headersTags);
+      iterationDuration.add(response.timings.duration, {
+        endpoint: "getCustomers",
       });
+
+      checkResponse(response, "getCustomers");
     } catch (error) {
       throw `Error: ${error.message}`;
     }
@@ -95,17 +94,17 @@ export function allTests(data) {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      tags: {
+        endpoint: "customerById",
+      },
     };
     try {
       let response = http.get(url, headers);
-
-      getCustomerByIdDuration.add(response.timings.duration);
-      getCustomerByIdFailures.add(response.status !== 200);
-      getCustomersByIdErrors.add(response.status != 200);
-
-      check(response, {
-        "Response code is 200": (res) => res.status === 200,
+      iterationDuration.add(response.timings.duration, {
+        endpoint: "customerById",
       });
+
+      checkResponse(response, "customerById");
     } catch (error) {
       throw `Error: ${error.message}`;
     }
@@ -118,21 +117,27 @@ export function allTests(data) {
         Authorization: `Bearer ${token}`,
         Accept: "application/json",
       },
+      tags: {
+        endpoint: "getBillingInfo",
+      },
     };
 
     try {
       let response = http.get(url, headers);
 
-      getBillingInfoDuration.add(response.timings.duration);
-      getBillingInfoFailures.add(response.status !== 200);
-      getBillingInfoErrors.add(response.status != 200);
-
-      check(response, {
-        "Response code is 200": (res) => res.status === 200,
+      iterationDuration.add(response.timings.duration, {
+        endpoint: "getBillingInfo",
       });
+
+      checkResponse(response, "getBillingInfo");
     } catch (error) {
       throw `Error: ${error.message}`;
     }
     sleep(1);
   });
+}
+export function handleSummary(data) {
+  return {
+    "testResults.html": htmlReport(data),
+  };
 }

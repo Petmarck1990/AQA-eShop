@@ -1,5 +1,11 @@
 import http from "k6/http";
 import { uuidv4 } from "https://jslib.k6.io/k6-utils/1.4.0/index.js";
+import { check } from "k6";
+import {
+  requestFailures,
+  iterationDuration,
+  requestErrors,
+} from "./customMetrics.js";
 
 export const baseUrlApi = JSON.parse(
   open("../TestData/k6BaseUrl.json")
@@ -70,4 +76,21 @@ export function randomNumber({ length = 100000 }) {
 
 export function randomPassword({ length = 12 }) {
   return uuidv4().substring(0, length);
+}
+
+export function checkResponse(response, endpoint) {
+  check(
+    response,
+    {
+      "Response is 200": (res) => res.status === 200,
+    },
+    { endpoint: endpoint }
+  );
+  if (endpoint) {
+    requestFailures.add(response.status > 300 ? 1 : 0, { endpoint: endpoint }),
+      requestErrors.add(response.status > 300 ? 1 : 0, { endpoint: endpoint });
+  } else {
+    requestFailures.add(response.status > 300 ? 1 : 0),
+      requestErrors.add(response.status > 300 ? 1 : 0);
+  }
 }

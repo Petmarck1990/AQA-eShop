@@ -1,8 +1,10 @@
 import http from "k6/http";
 import { check, sleep } from "k6";
-import { expect } from "https://jslib.k6.io/k6-testing/0.3.0/index.js";
 import { SharedArray } from "k6/data";
 import { getProducts, getAvailableProducts } from "../../../Helpers/helpers.js";
+import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
+import { checkResponse } from "../../../Helpers/helpers.js";
+import { iterationDuration } from "../../../Helpers/customMetrics.js";
 
 const usersData = new SharedArray("users", function () {
   const users = JSON.parse(open("../../../TestData/UsersTokens.json"));
@@ -19,6 +21,9 @@ export const options = {
   ],
   thresholds: {
     http_req_failed: ["rate<0.10"],
+    custom_iteration_duration: ["avg<4000"],
+    request_errors: ["rate<0.05"],
+    request_failures: ["rate<0.05"],
   },
 };
 
@@ -36,12 +41,16 @@ export default function () {
   };
   try {
     let response = http.get(url, headers);
+    iterationDuration.add(response.timings.duration);
 
-    check(response, {
-      "Status is 200": (res) => res.status === 200,
-    });
+    checkResponse(response, false);
   } catch (error) {
     throw `Error: ${error}`;
   }
   sleep(1);
+}
+export function handleSummary(data) {
+  return {
+    "testResults.html": htmlReport(data),
+  };
 }
