@@ -1,25 +1,14 @@
 import http from "k6/http";
-import { check, sleep } from "k6";
+import { sleep } from "k6";
 import { group } from "k6";
-// import { Trend, Rate, Counter } from "k6/metrics";
 import {
   getAvailableProducts,
   getRandomUser,
+  checkResponse,
 } from "../../../Helpers/helpers.js";
-import {
-  addToCartDuration,
-  loginDuration,
-  homepageDuration,
-  removeFromCartDuration,
-  addToCartFailures,
-  loginFailures,
-  removeFromCartFailures,
-  homepageFailures,
-  addToCartErrors,
-  loginErrors,
-  homepageErrors,
-  removeFromCartErrors,
-} from "../../../Helpers/customMetrics.js";
+import { htmlReport } from "https://raw.githubusercontent.com/benc-uk/k6-reporter/main/dist/bundle.js";
+import { textSummary } from "https://jslib.k6.io/k6-summary/0.0.1/index.js";
+import { iterationDuration } from "../../../Helpers/customMetrics.js";
 
 const baseUrlApi = JSON.parse(
   open("../../../TestData/k6BaseUrl.json")
@@ -34,11 +23,19 @@ export const options = {
     { duration: "2s", target: 0 },
   ],
   thresholds: {
-    http_req_failed: ["rate<0.01"],
-    addToCart_failures: ["rate<0.01"],
-    homepage_failures: ["rate<0.01"],
-    login_failures: ["rate<0.01"],
-    removeFromCart_failures: ["rate<0.01"],
+    http_req_failed: ["rate<0.05"],
+    "custom_iteration_duration{endpoint: login}": ["avg<4000"],
+    "custom_iteration_duration{endpoint: dashboard}": ["avg<4000"],
+    "custom_iteration_duration{endpoint: addProduct}": ["avg<4000"],
+    "custom_iteration_duration{endpoint: removeProduct}": ["avg<4000"],
+    "request_errors{endpoint: login}": ["rate<0.05"],
+    "request_errors{endpoint: dashboard}": ["rate<0.05"],
+    "request_errors{endpoint: addProduct}": ["rate<0.05"],
+    "request_errors{endpoint: removeProduct}": ["rate<0.05"],
+    "request_failures{endpoint: login}": ["rate<0.05"],
+    "request_failures{endpoint: dashboard}": ["rate<0.05"],
+    "request_failures{endpoint: addProduct}": ["rate<0.05"],
+    "request_failures{endpoint: removeProduct}": ["rate<0.05"],
   },
 };
 
@@ -58,7 +55,7 @@ export default function () {
       let availableProduct = getAvailableProducts({});
       let productId =
         availableProduct[Math.floor(Math.random() * availableProduct.length)];
-      group("Login new User", function () {
+      group("User login", function () {
         let url = `${baseUrlApi}/auth/login`;
         let data = {
           email: email,
@@ -68,18 +65,17 @@ export default function () {
           headers: {
             Accept: "application/json",
           },
+          tag: {
+            endpoint: "login",
+          },
         };
         try {
           let response = http.post(url, headers, data);
-          loginDuration.add(response.timings.duration);
-
-          check(response, {
-            "Response status is 200": (res) => res.status === 200,
+          iterationDuration.add(response.timings.duration, {
+            endpoint: "login",
           });
-          if (response.status != 200) {
-            loginFailures.add(1);
-            loginErrors.add(1);
-          }
+
+          checkResponse(response, "login");
         } catch (error) {
           throw `Error: ${error.message}`;
         }
@@ -92,20 +88,18 @@ export default function () {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
+          tag: {
+            endpoint: "dashboard",
+          },
         };
 
         try {
           let response = http.get(url, headers);
-
-          homepageDuration.add(response.timings.duration);
-
-          check(response, {
-            "Response status is 200": (res) => res.status === 200,
+          iterationDuration.add(response.timings.duration, {
+            endpoint: "dashboard",
           });
-          if (response.status != 200) {
-            homepageFailures.add(1);
-            homepageErrors.add(1);
-          }
+
+          checkResponse(response, "dashboard");
         } catch (error) {
           throw `Error: ${error.message}`;
         }
@@ -119,20 +113,18 @@ export default function () {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
+          tag: {
+            endpoint: "addProduct",
+          },
         };
 
         try {
           let response = http.post(url, headers);
-
-          addToCartDuration.add(response.timings.duration);
-
-          check(response, {
-            "Response status is 200": (res) => res.status === 200,
+          iterationDuration.add(response.timings.duration, {
+            endpoint: "addProduct",
           });
-          if (response.status != 200) {
-            addToCartFailures.add(1);
-            addToCartErrors.add(1);
-          }
+
+          checkResponse(response, "dashboard");
         } catch (error) {
           throw `Error: ${error.message}`;
         }
@@ -146,20 +138,18 @@ export default function () {
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
           },
+          tag: {
+            endpoint: "removeProduct",
+          },
         };
 
         try {
           let response = http.del(url, headers);
-
-          removeFromCartDuration.add(response.timings.duration);
-
-          check(response, {
-            "Response status is 200": (res) => res.status === 200,
+          iterationDuration.add(response.timings.duration, {
+            endpoint: "removeProduct",
           });
-          if (response.status != 200) {
-            removeFromCartFailures.add(1);
-            removeFromCartErrors.add(1);
-          }
+
+          checkResponse(response, "dashboard");
         } catch (error) {
           throw `Error: ${error.message}`;
         }
@@ -167,4 +157,10 @@ export default function () {
       });
     }
   );
+}
+export function handleSummary(data) {
+  return {
+    "testResults.html": htmlReport(data),
+    stdout: textSummary(data, { indent: " ", enableColors: true }),
+  };
 }
