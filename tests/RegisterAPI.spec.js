@@ -4,6 +4,7 @@ import credentials from "../Fixtures/credentials.json";
 import dotenv from "dotenv";
 import path, { resolve } from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
+import users from "../K6/TestData/UsersCredentials.json";
 
 test.describe("Positive test cases for Register API", async () => {
   test("Register a user with valid credentials", async ({ authAPI }) => {
