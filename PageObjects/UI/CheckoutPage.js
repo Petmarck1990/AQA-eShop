@@ -79,7 +79,8 @@ export class CheckoutPage {
     await expect(this.notWithMoney).toBeVisible();
     await expect(this.productExist).toBeVisible();
     const responsePromise = this.page.waitForResponse(`**/shipping-info`);
-    await this.nextStepButton.click();
+    // await this.nextStepButton.click();
+    await this.page.goForward();
     const response = await responsePromise;
     await expect(response.ok()).toBeTruthy();
     await expect(this.checkMessageCallMeDevil).toBeVisible();
