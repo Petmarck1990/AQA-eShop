@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+const store = require("../../Utils/globalStorage.js");
 
 export class DashboardPage {
   constructor(page) {

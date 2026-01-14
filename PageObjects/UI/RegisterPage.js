@@ -1,10 +1,10 @@
-import { GeneralMethods } from "../../Fixtures/generalMethods";
-import { expect } from "@playwright/test";
+import { GeneralMethods } from "../../Fixtures/generalMethods.js";
+import { expect, page } from "@playwright/test";
 import endpoints from "../../Fixtures/endpoints.json";
 import dotenv from "dotenv";
 import path from "path";
 dotenv.config({ path: path.resolve(__dirname, "../.emv") });
-let generalMethods = new GeneralMethods();
+let generalMethods = new GeneralMethods(page);
 
 export class RegisterPage {
   constructor(page) {
